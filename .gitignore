@@ -1,0 +1,30 @@
+# data & model artefacts (large / downloaded) - keep only the data README
+data/*
+!data/README.md
+*.nii
+*.nii.gz
+!tests/**/*.nii.gz
+models/*.pt
+models/*.metrics.json
+
+# generated reports (keep the sample under docs/ if you want one in-repo)
+reports/
+
+# python
+__pycache__/
+*.pyc
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# tooling caches
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# os
+.DS_Store
+Thumbs.db

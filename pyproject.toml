@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "brats-report"
+version = "0.1.0"
+description = "Research prototype: segment a brain tumour from MRI, measure it in millimetres, and draft a radiotherapy report for clinician review."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Ahmed Fawzy" }]
+keywords = ["medical-imaging", "brain-tumor", "segmentation", "MRI", "BraTS", "radiotherapy", "unet", "pytorch"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+dependencies = [
+    "numpy>=1.24",
+    "torch>=2.0",
+    "torchvision>=0.15",
+    "nibabel>=5.0",
+    "scikit-image>=0.21",
+    "scipy>=1.10",
+    "scikit-learn>=1.2",
+    "matplotlib>=3.7",
+    "reportlab>=3.6",
+    "pydicom>=2.4",
+    "arabic-reshaper>=3.0",
+    "python-bidi>=0.4",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "ruff>=0.4"]
+ui = ["gradio>=4"]
+
+[project.scripts]
+brats-report = "brats_report.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["B008"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
