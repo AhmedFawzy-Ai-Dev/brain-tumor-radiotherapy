@@ -89,3 +89,77 @@ class BratsSlices(Dataset):
         img = torch.from_numpy(np.ascontiguousarray(img.transpose(2, 0, 1)))
         ml = torch.from_numpy(np.ascontiguousarray(ml.transpose(2, 0, 1)))
         return img, ml
+
+
+# --- 2-D single-image tumour segmentation (LGG dataset) ----------------------
+
+def read_gray(path) -> np.ndarray:
+    """Read an image as a 2-D float32 grayscale array (any format)."""
+    from skimage.io import imread
+    a = imread(str(path)).astype(np.float32)
+    if a.ndim == 3:
+        a = a.mean(axis=2)
+    return a
+
+
+def normalize_2d(img: np.ndarray) -> np.ndarray:
+    """Z-score over the non-zero (brain) pixels; background stays 0."""
+    brain = img > 0
+    if brain.sum() > 0:
+        mu, sd = img[brain].mean(), img[brain].std() + 1e-6
+        img = (img - mu) / sd
+        img[~brain] = 0.0
+    return img.astype(np.float32)
+
+
+def list_lgg_pairs(root: str | Path) -> list[tuple[str, Path, Path]]:
+    """Find (patient, image, mask) triples in the LGG layout (*_mask.tif)."""
+    root = Path(root)
+    out = []
+    for mask in sorted(root.rglob("*_mask.tif")):
+        img = mask.with_name(mask.name.replace("_mask", ""))
+        if img.exists():
+            out.append((mask.parent.name, img, mask))
+    return out
+
+
+class LGGSlices(Dataset):
+    """Pre-materialised 2-D grayscale slices + binary tumour masks (LGG)."""
+
+    def __init__(self, pairs, size=128, empty_frac=0.3, augment=False, seed=0):
+        self.size = size
+        self.augment = augment
+        self.rng = np.random.default_rng(seed)
+        self.imgs: list[np.ndarray] = []
+        self.masks: list[np.ndarray] = []
+        tumor, empty = [], []
+        for _, img_p, mask_p in pairs:
+            (tumor if (read_gray(mask_p) > 0).any() else empty).append((img_p, mask_p))
+        keep = min(len(empty), int(len(tumor) * empty_frac))
+        chosen = ([empty[i] for i in self.rng.choice(len(empty), keep, replace=False)]
+                  if empty and keep > 0 else [])
+        s = self.size
+        for img_p, mask_p in tumor + chosen:
+            img = resize(normalize_2d(read_gray(img_p)), (s, s), order=1,
+                         mode="constant", anti_aliasing=True).astype(np.float16)
+            m = resize((read_gray(mask_p) > 0).astype(np.float32), (s, s), order=0,
+                       mode="constant", anti_aliasing=False).astype(np.float16)
+            self.imgs.append(img)
+            self.masks.append(m)
+
+    def __len__(self):
+        return len(self.imgs)
+
+    def __getitem__(self, i):
+        img = self.imgs[i].astype(np.float32)[None]      # (1, s, s)
+        m = (self.masks[i].astype(np.float32) > 0.5).astype(np.float32)[None]
+        if self.augment:
+            if self.rng.random() < 0.5:
+                img, m = img[:, :, ::-1], m[:, :, ::-1]
+            if self.rng.random() < 0.5:
+                img, m = img[:, ::-1, :], m[:, ::-1, :]
+            k = int(self.rng.integers(0, 4))
+            if k:
+                img, m = np.rot90(img, k, axes=(1, 2)), np.rot90(m, k, axes=(1, 2))
+        return (torch.from_numpy(np.ascontiguousarray(img)),
+                torch.from_numpy(np.ascontiguousarray(m)))

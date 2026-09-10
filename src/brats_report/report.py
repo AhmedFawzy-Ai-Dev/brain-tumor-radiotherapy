@@ -309,6 +309,158 @@ def write_pdf(meas, meta, model_info, image_png, out_pdf, tumour_type=None):
     doc.build(E)
 
 
+# --- 2-D single-image report (segment + measure one 2-D MRI) -----------------
+
+def render_slice_2d(image2d: np.ndarray, mask: np.ndarray, out_png: Path):
+    a = image2d.astype(np.float32)
+    if a.ndim == 3:
+        a = a.mean(axis=2)
+    lo, hi = np.percentile(a, [1, 99]) if a.max() > a.min() else (0, 1)
+    g = np.clip((a - lo) / (hi - lo + 1e-6), 0, 1)
+    rgb = np.stack([g, g, g], axis=-1)
+    m = np.asarray(mask) > 0
+    rgb[m] = rgb[m] * 0.5 + np.array([0.9, 0.1, 0.1]) * 0.5
+    fig, ax = plt.subplots(figsize=(5, 5), dpi=130)
+    ax.imshow(rgb)
+    ax.axis("off")
+    ys, xs = np.nonzero(m)
+    if len(xs) > 1:
+        pts = np.column_stack([xs, ys]).astype(float)
+        _, p, q = _max_caliper(pts)
+        ax.plot([p[0], q[0]], [p[1], q[1]], "-", color="cyan", lw=1.4, marker="o", ms=3)
+    ax.set_title("MRI (2-D) - tumour outline", fontsize=9)
+    fig.tight_layout()
+    out_png = Path(out_png)
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_png, bbox_inches="tight")
+    plt.close(fig)
+
+
+def _findings_2d(m2d: dict, tumour_type) -> list[tuple[str, str]]:
+    out = []
+    tl = _type_lines(tumour_type)
+    if tl:
+        out.append(tl)
+    u = m2d.get("unit", "px")
+    if not m2d.get("present"):
+        out.append(("No tumour detected by the 2-D segmenter.",
+                    "لم يكتشف مُجزّئ الصور ثنائية الأبعاد أي ورم."))
+        return out
+    area = f"{m2d['area']:.0f} {u}²" + (f" ({m2d['area_cm2']:.2f} cm²)" if u == "mm" else "")
+    out.append((
+        f"Tumour area {area}; longest diameter {m2d['recist_long']:.0f} {u}, "
+        f"perpendicular {m2d['recist_short']:.0f} {u}; bounding box "
+        f"{m2d['bbox_w']:.0f}×{m2d['bbox_h']:.0f} {u}.",
+        f"مساحة الورم {area}؛ أطول قطر {m2d['recist_long']:.0f} {u}، والقطر العمودي "
+        f"{m2d['recist_short']:.0f} {u}؛ الصندوق المحيط {m2d['bbox_w']:.0f}×{m2d['bbox_h']:.0f} {u}."))
+    if u == "px":
+        out.append(("Measurements are pixel-based (image has no physical scale) - "
+                    "supply a DICOM with pixel spacing for millimetres.",
+                    "القياسات بالبكسل (الصورة بدون مقياس فيزيائي) — استخدم DICOM يحمل مسافة "
+                    "البكسل للحصول على المليمتر."))
+    return out
+
+
+def generate_report_2d(image2d, mask, m2d, out_dir, patient_meta=None,
+                       model_info=None, stem="report", tumour_type=None):
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    model_info = model_info or {}
+    png = out_dir / f"{stem}_slice.png"
+    render_slice_2d(image2d, mask, png)
+
+    u = m2d.get("unit", "px")
+    meta = {"Input": "2-D MRI image", "Image size": f"{image2d.shape[1]} x {image2d.shape[0]} px",
+            "Pixel unit": u, "Generated": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")}
+    if tumour_type:
+        conf = tumour_type.get("confidence", 0) * 100
+        meta["Predicted tumour type"] = f"{tumour_type.get('name','?')} ({conf:.0f}%)"
+    if patient_meta:
+        meta = {**patient_meta, **meta}
+
+    findings = _findings_2d(m2d, tumour_type)
+    pdf, md, js = (out_dir / f"{stem}.{x}" for x in ("pdf", "md", "json"))
+    _write_pdf_2d(findings, meta, m2d, model_info, png, pdf, tumour_type)
+    _write_md_2d(findings, meta, m2d, model_info, md)
+    js.write_text(json.dumps({"metadata": meta, "measurements_2d": m2d,
+                              "classification": tumour_type, "model": model_info,
+                              "disclaimer": DISCLAIMER}, indent=2, ensure_ascii=False),
+                  encoding="utf-8")
+    return {"pdf": pdf, "markdown": md, "json": js, "image": png}
+
+
+def _write_md_2d(findings, meta, m2d, model_info, out_md):
+    L = [f"# {i18n.TITLE_EN} / {i18n.TITLE_AR}", "", f"> {DISCLAIMER}", ">",
+         f"> {i18n.DISCLAIMER_AR}", "", "## Scan / بيانات الفحص", ""]
+    for k, v in meta.items():
+        L.append(f"- **{k} / {i18n.FIELD.get(k, k)}**: {v}")
+    L += ["", "## Findings / النتائج", ""]
+    for en, arb in findings:
+        L += [f"- {en}", f"- {arb}"]
+    L += ["", f"_{DISCLAIMER}_", "", f"_{i18n.DISCLAIMER_AR}_"]
+    Path(out_md).write_text("\n".join(L), encoding="utf-8")
+
+
+def _write_pdf_2d(findings, meta, m2d, model_info, image_png, out_pdf, tumour_type=None):
+    from reportlab.lib import colors
+    from reportlab.lib.enums import TA_RIGHT
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import mm as MM
+    from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
+    AR, ARB = i18n.register_fonts()
+    ar = i18n.ar
+    styles = getSampleStyleSheet()
+    small = ParagraphStyle("s", parent=styles["Normal"], fontSize=8.5, leading=11)
+    small_ar = ParagraphStyle("sar", parent=small, fontName=AR, alignment=TA_RIGHT)
+    band_ar = ParagraphStyle("bar", fontName=AR, fontSize=8.5, leading=12,
+                             textColor=colors.white, alignment=TA_RIGHT)
+    navy, red = colors.HexColor("#1f3a5f"), colors.HexColor("#b00020")
+
+    doc = SimpleDocTemplate(str(out_pdf), pagesize=A4, topMargin=14 * MM,
+                            bottomMargin=14 * MM, leftMargin=16 * MM, rightMargin=16 * MM)
+    E = [Paragraph(i18n.TITLE_EN, styles["Title"]),
+         Paragraph(ar(i18n.TITLE_AR), ParagraphStyle("t", parent=styles["Title"],
+                                                     fontName=ARB, alignment=TA_RIGHT))]
+    dis = Table([[Paragraph("&#9888; " + DISCLAIMER,
+                            ParagraphStyle("b", fontSize=8.5, leading=11, textColor=colors.white))],
+                 [Paragraph(ar(i18n.DISCLAIMER_AR), band_ar)]], colWidths=[178 * MM])
+    dis.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), red),
+                             ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                             ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4)]))
+    E += [Spacer(1, 6), dis, Spacer(1, 8)]
+
+    if tumour_type:
+        conf = tumour_type.get("confidence", 0) * 100
+        nm = tumour_type.get("name", "?")
+        tb = Table([[Paragraph(f"Predicted tumour type: <b>{nm}</b> (confidence {conf:.0f}%)",
+                               ParagraphStyle("bg", fontSize=11, leading=14, textColor=colors.white))],
+                    [Paragraph(ar(f"نوع الورم المتوقّع: {i18n.TUMOUR_AR.get(nm, nm)} (الثقة {conf:.0f}٪)"),
+                               ParagraphStyle("bgar", fontName=ARB, fontSize=11, leading=15,
+                                              textColor=colors.white, alignment=TA_RIGHT))]],
+                   colWidths=[178 * MM])
+        tb.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), navy),
+                                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                                ("TOPPADDING", (0, 0), (-1, -1), 5), ("BOTTOMPADDING", (0, 0), (-1, -1), 5)]))
+        E += [tb, Spacer(1, 8)]
+
+    E.append(Paragraph("Findings / " + ar("النتائج"), styles["Heading2"]))
+    for en, arb in findings:
+        E.append(Paragraph("&bull; " + en, small))
+        E.append(Paragraph(ar("• " + arb), small_ar))
+        E.append(Spacer(1, 2))
+    if Path(image_png).exists():
+        E += [Spacer(1, 6), Paragraph("Tumour outline / " + ar("حدود الورم"), styles["Heading2"]),
+              Image(str(image_png), width=95 * MM, height=95 * MM)]
+    E += [Spacer(1, 6),
+          Paragraph(f"2-D segmenter: {model_info.get('name','UNet2D')} "
+                    f"(val Dice {model_info.get('val_dice','n/a')}). {meta.get('Generated')}.", small),
+          Paragraph("<i>" + DISCLAIMER + "</i>", small),
+          Paragraph(ar(i18n.DISCLAIMER_AR), small_ar)]
+    doc.build(E)
+
+
 def generate_report(scan: Scan, label: np.ndarray, meas: dict, out_dir,
                     patient_meta=None, model_info=None, stem="report", tumour_type=None):
     out_dir = Path(out_dir)

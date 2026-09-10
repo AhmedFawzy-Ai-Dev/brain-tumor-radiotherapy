@@ -155,3 +155,35 @@ def measure_region(label: np.ndarray, region: str, spacing: tuple,
 def measure_all(label: np.ndarray, spacing: tuple, axcodes: tuple) -> dict:
     """Measure every reporting region. Returns {region: RegionMeasurement}."""
     return {r: measure_region(label, r, spacing, axcodes) for r in REGIONS}
+
+
+def measure_mask_2d(mask: np.ndarray, spacing=(1.0, 1.0), unit="px") -> dict:
+    """Measure a single 2-D binary tumour mask.
+
+    `spacing` is (sx, sy) per pixel; `unit` is "px" (JPG/PNG, no physical scale)
+    or "mm" (e.g. from a DICOM PixelSpacing). Reports area, RECIST-style longest
+    diameter + perpendicular, and bounding box - all in the given unit.
+    """
+    m = np.asarray(mask) > 0
+    ys, xs = np.nonzero(m)
+    if len(xs) == 0:
+        return {"present": False, "unit": unit}
+    sx, sy = float(spacing[0]), float(spacing[1])
+    coords = np.column_stack([xs * sx, ys * sy]).astype(float)
+    long_d, a, b = _max_caliper(coords)
+    if long_d > 0:
+        d = (b - a) / long_d
+        proj = coords @ np.array([-d[1], d[0]])
+        short_d = float(proj.max() - proj.min())
+    else:
+        short_d = 0.0
+    area = float(len(xs) * sx * sy)
+    w = float((xs.max() - xs.min() + 1) * sx)
+    h = float((ys.max() - ys.min() + 1) * sy)
+    out = {"present": True, "unit": unit, "pixels": int(len(xs)),
+           "area": round(area, 1), "recist_long": round(long_d, 1),
+           "recist_short": round(short_d, 1), "bbox_w": round(w, 1),
+           "bbox_h": round(h, 1)}
+    if unit == "mm":  # add cm / cm2 conveniences
+        out["area_cm2"] = round(area / 100.0, 2)
+    return out

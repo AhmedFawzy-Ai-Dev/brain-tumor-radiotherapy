@@ -72,20 +72,25 @@ python -m brats_report.train --data data/brats_subset --epochs 20 --out models/b
 # tumour-type classifier (Kaggle 4-class set; see Data)
 python scripts/download_tumor_cls.py --out data/tumor_cls
 python -m brats_report.train_classifier --data data/tumor_cls --out models/tumour_clf.pt
+
+# 2-D single-image segmenter (LGG; for measuring 2-D images)
+python scripts/download_lgg.py --out data/lgg_raw
+python -m brats_report.train_seg2d --data data/lgg_raw --epochs 15 --out models/seg2d.pt
 ```
 
-**4. Generate a combined report for a scan** (type + location + size):
+**4. Generate a report** (type + location + size):
 
 ```bash
+# 3-D scan: segment + measure + classify
 brats-report --image case.nii.gz --model models/brats_unet.pt \
     --classifier models/tumour_clf.pt --out reports/case01
 
-# or from an existing mask; or classify a single 2-D image (type only):
-brats-report --image case.nii.gz --label seg.nii.gz --classifier models/tumour_clf.pt --out reports/case01
-brats-report --image slice.jpg --classifier models/tumour_clf.pt --out reports/case01
+# 2-D image: segment + measure + classify (dimensions in px, or mm with DICOM)
+brats-report --image slice.jpg --seg2d models/seg2d.pt \
+    --classifier models/tumour_clf.pt --out reports/case01
 ```
 
-DICOM input is supported too: pass a folder of DICOM slices to `--image`.
+DICOM is supported: a folder of slices to `--image` (3-D), or a single `.dcm` (2-D, real mm).
 
 **5. Or use the web UI** (upload a scan, get the report in the browser):
 
@@ -127,6 +132,9 @@ of it, `scripts/download_brats.py` uses **HTTP range requests** to fetch only:
 then parses each partial tar in memory and writes out matched image/label pairs — a few
 hundred MB instead of 7.6 GB, with per-range resume for flaky connections.
 
+For **2-D single-image** segmentation it uses the **LGG** dataset (~110 patients, 2-D
+FLAIR slices with binary tumour masks): `python scripts/download_lgg.py --out data/lgg_raw`.
+
 ## Model
 
 A compact 2-D U-Net (`brats_report/model.py`, ~2 M params at `base=24`) operating on
@@ -151,6 +159,17 @@ actual run — never hand-written.
 
 (2-D U-Net, 24 train / 6 val patients, 128px, CPU, 12 epochs — an accessible baseline;
 a 3-D model on the full BraTS set with a GPU reaches WT Dice ~0.90.)
+
+**2-D single-image segmentation** — for measuring a tumour on one ordinary 2-D MRI image
+(LGG dataset, patient-level split; `models/seg2d.metrics.json`):
+
+| Metric | Dice (val, tumour slices) |
+|---|---|
+| Whole tumour (2-D) | 0.46 |
+
+A CPU baseline (UNet2D, 128px, 15 epochs, patient-level split) — enough to outline the
+tumour and measure it; more epochs / higher resolution / a GPU raise this substantially.
+This powers dimension measurement on 2-D inputs (pixels, or mm with DICOM pixel spacing).
 
 **Classification** — tumour type on the Kaggle test set (1311 images; ResNet18 frozen
 backbone + head; `models/tumour_clf.metrics.json`):
@@ -183,11 +202,15 @@ src/brats_report/
   measure.py     # mask + spacing -> volumes, extents, calliper/RECIST diameters
   classify.py    # tumour-type classifier (torchvision backbone + head)
   train_classifier.py  # classifier training (cached features, honest test metrics)
-  report.py      # annotated slice + PDF / Markdown / JSON report (type + size)
+  seg2d.py       # 2-D single-image tumour segmenter (load + predict)
+  train_seg2d.py # 2-D segmenter training on LGG (patient-level split)
+  report.py      # annotated slice + PDF / Markdown / JSON report (type + size), 3-D & 2-D
   cli.py         # `brats-report` end-to-end command
+app.py           # Gradio web UI
 scripts/download_brats.py         # range-request BraTS subset downloader
 scripts/download_tumor_cls.py     # tumour-type classification dataset downloader
-tests/                            # measurement + pipeline + classifier tests
+scripts/download_lgg.py           # 2-D segmentation (LGG) dataset downloader
+tests/                            # measurement + pipeline + classifier + 2-D tests
 ```
 
 ## Limitations & intended use

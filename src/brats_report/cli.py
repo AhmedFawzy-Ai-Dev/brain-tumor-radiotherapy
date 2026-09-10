@@ -79,11 +79,74 @@ def _run(scan, label, out, patient_meta, model_info, tumour_type=None):
     return paths
 
 
+def read_image2d(path: Path):
+    """Return (image2d, spacing, unit) for a 2-D image or single DICOM file."""
+    from .dataset import read_gray
+    if Path(path).suffix.lower() == ".dcm":
+        import pydicom
+        d = pydicom.dcmread(str(path))
+        ps = getattr(d, "PixelSpacing", None)
+        if ps is not None:
+            return d.pixel_array.astype(np.float32), (float(ps[1]), float(ps[0])), "mm"
+        return d.pixel_array.astype(np.float32), (1.0, 1.0), "px"
+    return read_gray(path), (1.0, 1.0), "px"
+
+
+def process_2d(path, out_dir, classifier=None, seg2d=None, thresh=0.5, patient_meta=None):
+    """Core 2-D pipeline (shared by CLI and web UI). Returns (paths, tt, m2d)."""
+    from .measure import measure_mask_2d
+    from .report import generate_report_2d
+
+    img2d, spacing, unit = read_image2d(Path(path))
+
+    tt = None
+    if classifier and Path(classifier).exists():
+        from .classify import load_classifier, predict_type
+        clf, ck = load_classifier(classifier)
+        tt = predict_type(clf, img2d, ck)
+        tt["model"] = f"{ck.get('arch','resnet18')} (frozen backbone + head)"
+        tt["accuracy"] = ck.get("test_accuracy", "n/a")
+
+    seg2d = seg2d or "models/seg2d.pt"
+    if Path(seg2d).exists():
+        from .seg2d import load_seg2d, predict_mask2d
+        model, ckpt = load_seg2d(seg2d)
+        mask = predict_mask2d(img2d, model, ckpt, thresh=thresh)
+        m2d = measure_mask_2d(mask, spacing, unit)
+        minfo = {"name": f"UNet2D(1->1) base={ckpt['base']}",
+                 "val_dice": ckpt.get("val_dice", "n/a")}
+    else:
+        mask = np.zeros(img2d.shape[:2], np.uint8)
+        m2d = {"present": False, "unit": unit}
+        minfo = {"name": "n/a (no 2-D segmenter)", "val_dice": "n/a"}
+
+    paths = generate_report_2d(img2d, mask, m2d, out_dir, patient_meta=patient_meta,
+                               model_info=minfo, tumour_type=tt)
+    return paths, tt, m2d
+
+
+def _run_2d(path: Path, args, meta):
+    if not args.classifier and not Path(args.seg2d or "models/seg2d.pt").exists():
+        raise SystemExit("2-D input needs a 2-D segmenter (models/seg2d.pt) or --classifier")
+    paths, tt, m2d = process_2d(path, args.out, args.classifier, args.seg2d,
+                                args.thresh, meta)
+    print(f"\nReport written to {args.out}:")
+    for k, p in paths.items():
+        print(f"  {k:9s} {p}")
+    if tt:
+        print(f"\nType: {tt['name']} ({tt['confidence']*100:.0f}%)")
+    if m2d.get("present"):
+        print(f"Tumour: area {m2d['area']:.0f} {m2d['unit']}², longest diameter "
+              f"{m2d['recist_long']:.0f} {m2d['unit']}")
+    return paths
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Brain tumour report (DRAFT).")
     ap.add_argument("--image", help="4-channel NIfTI, a DICOM folder, or a 2-D image")
     ap.add_argument("--label", help="existing integer segmentation NIfTI (skip model)")
-    ap.add_argument("--model", help="trained segmentation U-Net checkpoint (.pt)")
+    ap.add_argument("--model", help="trained 3-D segmentation U-Net checkpoint (.pt)")
+    ap.add_argument("--seg2d", help="trained 2-D single-image segmenter (.pt) for 2-D inputs")
     ap.add_argument("--classifier", help="trained tumour-type classifier (.pt)")
     ap.add_argument("--out", default="reports/case", help="output directory")
     ap.add_argument("--demo", action="store_true", help="run on a synthetic phantom")
@@ -108,15 +171,9 @@ def main(argv=None):
         ap.error("--image is required (or use --demo)")
     path = Path(args.image)
 
-    # 2-D image -> classification only (no 3-D measurements possible)
-    if path.suffix.lower() in IMG2D_EXT:
-        if not args.classifier:
-            ap.error("a 2-D image needs --classifier (no 3-D data to measure)")
-        scan = _load_2d_as_scan(path)
-        label = np.zeros(scan.data.shape[:3], np.uint8)
-        tt = _classify(scan, label, args.classifier)
-        return _run(scan, label, args.out, meta,
-                    {"name": "n/a (2-D image; no segmentation)", "val_dice_mean": "n/a"}, tt)
+    # 2-D image (or single DICOM) -> 2-D segmentation + measurement + type
+    if path.suffix.lower() in IMG2D_EXT or path.suffix.lower() == ".dcm":
+        return _run_2d(path, args, meta)
 
     scan = load_scan(args.image)
     if args.label:
