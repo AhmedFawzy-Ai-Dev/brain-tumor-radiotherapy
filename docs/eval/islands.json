@@ -1,0 +1,372 @@
+{
+  "summary": {
+    "region": "WT",
+    "n_cases": 30,
+    "cases_with_more_than_one_piece": 27,
+    "cases_with_two_or_more_pieces_over_1cm3": 2,
+    "speck_recist_inflated_cases": 5,
+    "speck_recist_inflation_max_mm": 26.3,
+    "speck_recist_cases": [
+      "BRATS_007",
+      "BRATS_089",
+      "BRATS_131",
+      "BRATS_353",
+      "BRATS_463"
+    ],
+    "speck_max3d_inflated_cases": 8,
+    "speck_max3d_inflation_max_mm": 15.3,
+    "speck_max3d_cases": [
+      "BRATS_005",
+      "BRATS_007",
+      "BRATS_131",
+      "BRATS_176",
+      "BRATS_185",
+      "BRATS_353",
+      "BRATS_386",
+      "BRATS_463"
+    ],
+    "separate_region_recist_inflated_cases": 1,
+    "separate_region_recist_inflation_max_mm": 38.9,
+    "separate_region_recist_cases": [
+      "BRATS_019"
+    ],
+    "separate_region_max3d_inflated_cases": 1,
+    "separate_region_max3d_inflation_max_mm": 57.4,
+    "separate_region_max3d_cases": [
+      "BRATS_019"
+    ],
+    "speck_inflated_cases_any": 9
+  },
+  "cases": [
+    {
+      "case": "BRATS_005",
+      "components": 9,
+      "large_pieces": 2,
+      "recist_old_mm": 89.0,
+      "recist_new_mm": 89.0,
+      "max3d_old_mm": 96.0,
+      "max3d_new_mm": 91.2,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": 0.001
+    },
+    {
+      "case": "BRATS_007",
+      "components": 6,
+      "large_pieces": 1,
+      "recist_old_mm": 95.2,
+      "recist_new_mm": 92.0,
+      "max3d_old_mm": 98.1,
+      "max3d_new_mm": 96.0,
+      "recist_far_piece_cm3": 0.473,
+      "max3d_far_piece_cm3": 0.035
+    },
+    {
+      "case": "BRATS_009",
+      "components": 3,
+      "large_pieces": 1,
+      "recist_old_mm": 104.8,
+      "recist_new_mm": 104.8,
+      "max3d_old_mm": 108.6,
+      "max3d_new_mm": 108.6,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_019",
+      "components": 3,
+      "large_pieces": 3,
+      "recist_old_mm": 135.2,
+      "recist_new_mm": 96.3,
+      "max3d_old_mm": 158.4,
+      "max3d_new_mm": 101.0,
+      "recist_far_piece_cm3": 55.309,
+      "max3d_far_piece_cm3": 1.431
+    },
+    {
+      "case": "BRATS_050",
+      "components": 8,
+      "large_pieces": 1,
+      "recist_old_mm": 71.7,
+      "recist_new_mm": 71.7,
+      "max3d_old_mm": 77.6,
+      "max3d_new_mm": 77.6,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_074",
+      "components": 4,
+      "large_pieces": 1,
+      "recist_old_mm": 127.1,
+      "recist_new_mm": 127.1,
+      "max3d_old_mm": 127.1,
+      "max3d_new_mm": 127.1,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_085",
+      "components": 1,
+      "large_pieces": 1,
+      "recist_old_mm": 80.7,
+      "recist_new_mm": 80.7,
+      "max3d_old_mm": 82.1,
+      "max3d_new_mm": 82.1,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_089",
+      "components": 10,
+      "large_pieces": 1,
+      "recist_old_mm": 90.7,
+      "recist_new_mm": 87.6,
+      "max3d_old_mm": 105.5,
+      "max3d_new_mm": 105.5,
+      "recist_far_piece_cm3": 0.001,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_131",
+      "components": 6,
+      "large_pieces": 1,
+      "recist_old_mm": 115.5,
+      "recist_new_mm": 89.2,
+      "max3d_old_mm": 116.9,
+      "max3d_new_mm": 105.2,
+      "recist_far_piece_cm3": 0.149,
+      "max3d_far_piece_cm3": 0.149
+    },
+    {
+      "case": "BRATS_133",
+      "components": 4,
+      "large_pieces": 1,
+      "recist_old_mm": 67.1,
+      "recist_new_mm": 67.1,
+      "max3d_old_mm": 95.0,
+      "max3d_new_mm": 95.0,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_150",
+      "components": 8,
+      "large_pieces": 1,
+      "recist_old_mm": 99.4,
+      "recist_new_mm": 98.7,
+      "max3d_old_mm": 123.9,
+      "max3d_new_mm": 123.9,
+      "recist_far_piece_cm3": 0.038,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_166",
+      "components": 1,
+      "large_pieces": 1,
+      "recist_old_mm": 70.2,
+      "recist_new_mm": 70.2,
+      "max3d_old_mm": 73.7,
+      "max3d_new_mm": 73.7,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_176",
+      "components": 8,
+      "large_pieces": 1,
+      "recist_old_mm": 49.3,
+      "recist_new_mm": 49.3,
+      "max3d_old_mm": 61.4,
+      "max3d_new_mm": 57.1,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": 0.001
+    },
+    {
+      "case": "BRATS_185",
+      "components": 12,
+      "large_pieces": 1,
+      "recist_old_mm": 52.2,
+      "recist_new_mm": 52.2,
+      "max3d_old_mm": 76.5,
+      "max3d_new_mm": 74.4,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": 0.002
+    },
+    {
+      "case": "BRATS_199",
+      "components": 2,
+      "large_pieces": 1,
+      "recist_old_mm": 60.7,
+      "recist_new_mm": 60.7,
+      "max3d_old_mm": 64.5,
+      "max3d_new_mm": 64.5,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_208",
+      "components": 4,
+      "large_pieces": 1,
+      "recist_old_mm": 87.1,
+      "recist_new_mm": 87.1,
+      "max3d_old_mm": 90.0,
+      "max3d_new_mm": 90.0,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_243",
+      "components": 12,
+      "large_pieces": 1,
+      "recist_old_mm": 66.7,
+      "recist_new_mm": 65.8,
+      "max3d_old_mm": 69.7,
+      "max3d_new_mm": 69.6,
+      "recist_far_piece_cm3": 0.001,
+      "max3d_far_piece_cm3": 0.001
+    },
+    {
+      "case": "BRATS_275",
+      "components": 2,
+      "large_pieces": 1,
+      "recist_old_mm": 89.3,
+      "recist_new_mm": 89.3,
+      "max3d_old_mm": 98.9,
+      "max3d_new_mm": 98.9,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_279",
+      "components": 6,
+      "large_pieces": 1,
+      "recist_old_mm": 111.8,
+      "recist_new_mm": 111.8,
+      "max3d_old_mm": 114.8,
+      "max3d_new_mm": 114.8,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_316",
+      "components": 5,
+      "large_pieces": 1,
+      "recist_old_mm": 62.3,
+      "recist_new_mm": 62.3,
+      "max3d_old_mm": 80.7,
+      "max3d_new_mm": 80.7,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_332",
+      "components": 6,
+      "large_pieces": 1,
+      "recist_old_mm": 83.3,
+      "recist_new_mm": 83.3,
+      "max3d_old_mm": 106.3,
+      "max3d_new_mm": 106.3,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_353",
+      "components": 6,
+      "large_pieces": 1,
+      "recist_old_mm": 65.3,
+      "recist_new_mm": 60.2,
+      "max3d_old_mm": 65.8,
+      "max3d_new_mm": 64.4,
+      "recist_far_piece_cm3": 0.001,
+      "max3d_far_piece_cm3": 0.001
+    },
+    {
+      "case": "BRATS_384",
+      "components": 3,
+      "large_pieces": 1,
+      "recist_old_mm": 81.7,
+      "recist_new_mm": 81.7,
+      "max3d_old_mm": 88.2,
+      "max3d_new_mm": 88.2,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_386",
+      "components": 11,
+      "large_pieces": 1,
+      "recist_old_mm": 84.4,
+      "recist_new_mm": 84.4,
+      "max3d_old_mm": 86.1,
+      "max3d_new_mm": 85.0,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": 0.072
+    },
+    {
+      "case": "BRATS_388",
+      "components": 4,
+      "large_pieces": 1,
+      "recist_old_mm": 80.6,
+      "recist_new_mm": 80.6,
+      "max3d_old_mm": 83.2,
+      "max3d_new_mm": 83.2,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_400",
+      "components": 2,
+      "large_pieces": 1,
+      "recist_old_mm": 75.2,
+      "recist_new_mm": 75.2,
+      "max3d_old_mm": 81.5,
+      "max3d_new_mm": 81.5,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_428",
+      "components": 1,
+      "large_pieces": 1,
+      "recist_old_mm": 70.9,
+      "recist_new_mm": 70.9,
+      "max3d_old_mm": 71.7,
+      "max3d_new_mm": 71.7,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_459",
+      "components": 4,
+      "large_pieces": 1,
+      "recist_old_mm": 37.7,
+      "recist_new_mm": 37.7,
+      "max3d_old_mm": 39.0,
+      "max3d_new_mm": 39.0,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    },
+    {
+      "case": "BRATS_463",
+      "components": 10,
+      "large_pieces": 1,
+      "recist_old_mm": 92.1,
+      "recist_new_mm": 82.1,
+      "max3d_old_mm": 100.3,
+      "max3d_new_mm": 85.0,
+      "recist_far_piece_cm3": 0.008,
+      "max3d_far_piece_cm3": 0.008
+    },
+    {
+      "case": "BRATS_482",
+      "components": 5,
+      "large_pieces": 1,
+      "recist_old_mm": 101.1,
+      "recist_new_mm": 101.1,
+      "max3d_old_mm": 106.1,
+      "max3d_new_mm": 106.1,
+      "recist_far_piece_cm3": null,
+      "max3d_far_piece_cm3": null
+    }
+  ]
+}

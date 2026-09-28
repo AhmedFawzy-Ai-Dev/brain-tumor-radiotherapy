@@ -1,0 +1,1488 @@
+{
+  "name": "24 patients [largest]",
+  "model": "models/brats_unet_baseline.pt",
+  "tta": false,
+  "post": "largest",
+  "part": "test",
+  "n_cases": 30,
+  "seconds_per_case": 31.6,
+  "train_config": null,
+  "summary": {
+    "WT": {
+      "dice_mean": 0.7849,
+      "dice_median": 0.8531,
+      "hd95_median_mm": 5.79,
+      "volume_mae_cm3": 21.59,
+      "volume_median_abs_pct": 19.5,
+      "volume_bias_cm3": -18.8,
+      "volume_r": 0.913,
+      "max_diameter_mae_mm": 9.7,
+      "recist_mae_mm": 9.0
+    },
+    "TC": {
+      "dice_mean": 0.6578,
+      "dice_median": 0.7812,
+      "hd95_median_mm": 9.0,
+      "volume_mae_cm3": 10.18,
+      "volume_median_abs_pct": 26.2,
+      "volume_bias_cm3": -7.21,
+      "volume_r": 0.784,
+      "max_diameter_mae_mm": 13.2,
+      "recist_mae_mm": 11.8
+    },
+    "ET": {
+      "dice_mean": 0.6854,
+      "dice_median": 0.777,
+      "hd95_median_mm": 3.74,
+      "volume_mae_cm3": 4.4,
+      "volume_median_abs_pct": 22.3,
+      "volume_bias_cm3": -1.59,
+      "volume_r": 0.876,
+      "max_diameter_mae_mm": 7.6,
+      "recist_mae_mm": 8.6
+    },
+    "dice_mean_all": 0.7094
+  },
+  "cases": [
+    {
+      "case": "BRATS_005",
+      "seconds": 27.9,
+      "scores": {
+        "WT": {
+          "dice": 0.6216,
+          "hd95_mm": 12.96,
+          "pred": {
+            "volume_cm3": 39.2,
+            "max_diameter_mm": 78.7,
+            "recist_long_mm": 63.6
+          },
+          "gt": {
+            "volume_cm3": 80.68,
+            "max_diameter_mm": 91.2,
+            "recist_long_mm": 89.0
+          }
+        },
+        "TC": {
+          "dice": 0.4019,
+          "hd95_mm": 12.69,
+          "pred": {
+            "volume_cm3": 12.04,
+            "max_diameter_mm": 51.7,
+            "recist_long_mm": 43.9
+          },
+          "gt": {
+            "volume_cm3": 45.27,
+            "max_diameter_mm": 91.1,
+            "recist_long_mm": 89.0
+          }
+        },
+        "ET": {
+          "dice": 0.4822,
+          "hd95_mm": 12.12,
+          "pred": {
+            "volume_cm3": 6.5,
+            "max_diameter_mm": 51.7,
+            "recist_long_mm": 43.1
+          },
+          "gt": {
+            "volume_cm3": 18.35,
+            "max_diameter_mm": 91.1,
+            "recist_long_mm": 89.0
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_007",
+      "seconds": 28.1,
+      "scores": {
+        "WT": {
+          "dice": 0.8615,
+          "hd95_mm": 3.61,
+          "pred": {
+            "volume_cm3": 63.42,
+            "max_diameter_mm": 96.8,
+            "recist_long_mm": 88.6
+          },
+          "gt": {
+            "volume_cm3": 61.09,
+            "max_diameter_mm": 96.0,
+            "recist_long_mm": 92.0
+          }
+        },
+        "TC": {
+          "dice": 0.8536,
+          "hd95_mm": 4.12,
+          "pred": {
+            "volume_cm3": 26.57,
+            "max_diameter_mm": 84.1,
+            "recist_long_mm": 67.5
+          },
+          "gt": {
+            "volume_cm3": 26.19,
+            "max_diameter_mm": 86.4,
+            "recist_long_mm": 67.5
+          }
+        },
+        "ET": {
+          "dice": 0.8126,
+          "hd95_mm": 2.45,
+          "pred": {
+            "volume_cm3": 19.64,
+            "max_diameter_mm": 84.1,
+            "recist_long_mm": 66.6
+          },
+          "gt": {
+            "volume_cm3": 21.68,
+            "max_diameter_mm": 86.4,
+            "recist_long_mm": 67.5
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_009",
+      "seconds": 27.5,
+      "scores": {
+        "WT": {
+          "dice": 0.8953,
+          "hd95_mm": 5.83,
+          "pred": {
+            "volume_cm3": 187.12,
+            "max_diameter_mm": 110.1,
+            "recist_long_mm": 101.5
+          },
+          "gt": {
+            "volume_cm3": 210.29,
+            "max_diameter_mm": 108.6,
+            "recist_long_mm": 104.8
+          }
+        },
+        "TC": {
+          "dice": 0.7467,
+          "hd95_mm": 11.0,
+          "pred": {
+            "volume_cm3": 48.64,
+            "max_diameter_mm": 59.9,
+            "recist_long_mm": 55.7
+          },
+          "gt": {
+            "volume_cm3": 76.67,
+            "max_diameter_mm": 70.1,
+            "recist_long_mm": 64.3
+          }
+        },
+        "ET": {
+          "dice": 0.7968,
+          "hd95_mm": 3.61,
+          "pred": {
+            "volume_cm3": 29.03,
+            "max_diameter_mm": 58.0,
+            "recist_long_mm": 54.2
+          },
+          "gt": {
+            "volume_cm3": 42.37,
+            "max_diameter_mm": 62.6,
+            "recist_long_mm": 60.8
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_019",
+      "seconds": 27.4,
+      "scores": {
+        "WT": {
+          "dice": 0.2213,
+          "hd95_mm": 82.72,
+          "pred": {
+            "volume_cm3": 73.53,
+            "max_diameter_mm": 111.1,
+            "recist_long_mm": 104.4
+          },
+          "gt": {
+            "volume_cm3": 149.34,
+            "max_diameter_mm": 101.0,
+            "recist_long_mm": 96.3
+          }
+        },
+        "TC": {
+          "dice": 0.0006,
+          "hd95_mm": 100.22,
+          "pred": {
+            "volume_cm3": 34.5,
+            "max_diameter_mm": 98.1,
+            "recist_long_mm": 94.9
+          },
+          "gt": {
+            "volume_cm3": 36.25,
+            "max_diameter_mm": 50.0,
+            "recist_long_mm": 40.0
+          }
+        },
+        "ET": {
+          "dice": 0.0007,
+          "hd95_mm": 101.0,
+          "pred": {
+            "volume_cm3": 28.73,
+            "max_diameter_mm": 97.7,
+            "recist_long_mm": 94.9
+          },
+          "gt": {
+            "volume_cm3": 19.84,
+            "max_diameter_mm": 50.0,
+            "recist_long_mm": 39.9
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_050",
+      "seconds": 31.0,
+      "scores": {
+        "WT": {
+          "dice": 0.9054,
+          "hd95_mm": 4.0,
+          "pred": {
+            "volume_cm3": 67.7,
+            "max_diameter_mm": 69.5,
+            "recist_long_mm": 66.7
+          },
+          "gt": {
+            "volume_cm3": 76.24,
+            "max_diameter_mm": 77.6,
+            "recist_long_mm": 71.7
+          }
+        },
+        "TC": {
+          "dice": 0.9105,
+          "hd95_mm": 3.29,
+          "pred": {
+            "volume_cm3": 44.15,
+            "max_diameter_mm": 63.0,
+            "recist_long_mm": 63.0
+          },
+          "gt": {
+            "volume_cm3": 45.37,
+            "max_diameter_mm": 63.8,
+            "recist_long_mm": 57.7
+          }
+        },
+        "ET": {
+          "dice": 0.9219,
+          "hd95_mm": 2.24,
+          "pred": {
+            "volume_cm3": 38.55,
+            "max_diameter_mm": 62.1,
+            "recist_long_mm": 62.0
+          },
+          "gt": {
+            "volume_cm3": 38.27,
+            "max_diameter_mm": 59.2,
+            "recist_long_mm": 51.0
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_074",
+      "seconds": 27.4,
+      "scores": {
+        "WT": {
+          "dice": 0.8042,
+          "hd95_mm": 9.8,
+          "pred": {
+            "volume_cm3": 122.36,
+            "max_diameter_mm": 116.3,
+            "recist_long_mm": 114.8
+          },
+          "gt": {
+            "volume_cm3": 165.51,
+            "max_diameter_mm": 127.1,
+            "recist_long_mm": 127.1
+          }
+        },
+        "TC": {
+          "dice": 0.0506,
+          "hd95_mm": 16.03,
+          "pred": {
+            "volume_cm3": 9.1,
+            "max_diameter_mm": 36.9,
+            "recist_long_mm": 23.9
+          },
+          "gt": {
+            "volume_cm3": 11.78,
+            "max_diameter_mm": 62.2,
+            "recist_long_mm": 48.4
+          }
+        },
+        "ET": {
+          "dice": 0.0603,
+          "hd95_mm": 15.57,
+          "pred": {
+            "volume_cm3": 0.43,
+            "max_diameter_mm": 26.2,
+            "recist_long_mm": 23.2
+          },
+          "gt": {
+            "volume_cm3": 1.0,
+            "max_diameter_mm": 35.3,
+            "recist_long_mm": 29.2
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_085",
+      "seconds": 26.2,
+      "scores": {
+        "WT": {
+          "dice": 0.8978,
+          "hd95_mm": 4.0,
+          "pred": {
+            "volume_cm3": 86.01,
+            "max_diameter_mm": 79.3,
+            "recist_long_mm": 76.7
+          },
+          "gt": {
+            "volume_cm3": 104.31,
+            "max_diameter_mm": 82.1,
+            "recist_long_mm": 80.7
+          }
+        },
+        "TC": {
+          "dice": 0.9352,
+          "hd95_mm": 1.41,
+          "pred": {
+            "volume_cm3": 15.65,
+            "max_diameter_mm": 39.8,
+            "recist_long_mm": 32.2
+          },
+          "gt": {
+            "volume_cm3": 16.38,
+            "max_diameter_mm": 41.4,
+            "recist_long_mm": 32.0
+          }
+        },
+        "ET": {
+          "dice": 0.955,
+          "hd95_mm": 1.0,
+          "pred": {
+            "volume_cm3": 14.1,
+            "max_diameter_mm": 39.1,
+            "recist_long_mm": 31.6
+          },
+          "gt": {
+            "volume_cm3": 14.9,
+            "max_diameter_mm": 40.4,
+            "recist_long_mm": 31.3
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_089",
+      "seconds": 28.1,
+      "scores": {
+        "WT": {
+          "dice": 0.9502,
+          "hd95_mm": 2.45,
+          "pred": {
+            "volume_cm3": 168.95,
+            "max_diameter_mm": 102.8,
+            "recist_long_mm": 84.6
+          },
+          "gt": {
+            "volume_cm3": 182.34,
+            "max_diameter_mm": 105.5,
+            "recist_long_mm": 87.6
+          }
+        },
+        "TC": {
+          "dice": 0.8971,
+          "hd95_mm": 6.0,
+          "pred": {
+            "volume_cm3": 35.45,
+            "max_diameter_mm": 48.8,
+            "recist_long_mm": 43.2
+          },
+          "gt": {
+            "volume_cm3": 43.19,
+            "max_diameter_mm": 59.4,
+            "recist_long_mm": 53.5
+          }
+        },
+        "ET": {
+          "dice": 0.9559,
+          "hd95_mm": 1.0,
+          "pred": {
+            "volume_cm3": 30.59,
+            "max_diameter_mm": 48.3,
+            "recist_long_mm": 42.2
+          },
+          "gt": {
+            "volume_cm3": 30.04,
+            "max_diameter_mm": 49.5,
+            "recist_long_mm": 42.4
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_131",
+      "seconds": 33.2,
+      "scores": {
+        "WT": {
+          "dice": 0.7905,
+          "hd95_mm": 9.9,
+          "pred": {
+            "volume_cm3": 119.68,
+            "max_diameter_mm": 104.7,
+            "recist_long_mm": 85.1
+          },
+          "gt": {
+            "volume_cm3": 173.33,
+            "max_diameter_mm": 105.2,
+            "recist_long_mm": 89.2
+          }
+        },
+        "TC": {
+          "dice": 0.6055,
+          "hd95_mm": 8.77,
+          "pred": {
+            "volume_cm3": 22.7,
+            "max_diameter_mm": 65.3,
+            "recist_long_mm": 48.4
+          },
+          "gt": {
+            "volume_cm3": 44.96,
+            "max_diameter_mm": 77.9,
+            "recist_long_mm": 52.9
+          }
+        },
+        "ET": {
+          "dice": 0.6562,
+          "hd95_mm": 6.4,
+          "pred": {
+            "volume_cm3": 14.41,
+            "max_diameter_mm": 65.2,
+            "recist_long_mm": 43.4
+          },
+          "gt": {
+            "volume_cm3": 16.98,
+            "max_diameter_mm": 66.0,
+            "recist_long_mm": 50.2
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_133",
+      "seconds": 32.8,
+      "scores": {
+        "WT": {
+          "dice": 0.8679,
+          "hd95_mm": 10.37,
+          "pred": {
+            "volume_cm3": 51.41,
+            "max_diameter_mm": 79.4,
+            "recist_long_mm": 67.7
+          },
+          "gt": {
+            "volume_cm3": 59.91,
+            "max_diameter_mm": 95.0,
+            "recist_long_mm": 67.1
+          }
+        },
+        "TC": {
+          "dice": 0.6598,
+          "hd95_mm": 6.08,
+          "pred": {
+            "volume_cm3": 18.56,
+            "max_diameter_mm": 41.5,
+            "recist_long_mm": 37.3
+          },
+          "gt": {
+            "volume_cm3": 13.85,
+            "max_diameter_mm": 44.7,
+            "recist_long_mm": 39.6
+          }
+        },
+        "ET": {
+          "dice": 0.5162,
+          "hd95_mm": 7.35,
+          "pred": {
+            "volume_cm3": 16.56,
+            "max_diameter_mm": 40.2,
+            "recist_long_mm": 36.7
+          },
+          "gt": {
+            "volume_cm3": 5.82,
+            "max_diameter_mm": 28.5,
+            "recist_long_mm": 23.0
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_150",
+      "seconds": 40.2,
+      "scores": {
+        "WT": {
+          "dice": 0.796,
+          "hd95_mm": 20.64,
+          "pred": {
+            "volume_cm3": 98.56,
+            "max_diameter_mm": 96.9,
+            "recist_long_mm": 90.3
+          },
+          "gt": {
+            "volume_cm3": 143.8,
+            "max_diameter_mm": 123.9,
+            "recist_long_mm": 98.7
+          }
+        },
+        "TC": {
+          "dice": 0.4329,
+          "hd95_mm": 11.09,
+          "pred": {
+            "volume_cm3": 10.23,
+            "max_diameter_mm": 62.0,
+            "recist_long_mm": 59.9
+          },
+          "gt": {
+            "volume_cm3": 18.9,
+            "max_diameter_mm": 67.1,
+            "recist_long_mm": 63.8
+          }
+        },
+        "ET": {
+          "dice": 0.5905,
+          "hd95_mm": 4.47,
+          "pred": {
+            "volume_cm3": 3.82,
+            "max_diameter_mm": 31.2,
+            "recist_long_mm": 31.1
+          },
+          "gt": {
+            "volume_cm3": 3.06,
+            "max_diameter_mm": 32.6,
+            "recist_long_mm": 28.5
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_166",
+      "seconds": 37.1,
+      "scores": {
+        "WT": {
+          "dice": 0.9472,
+          "hd95_mm": 2.0,
+          "pred": {
+            "volume_cm3": 94.79,
+            "max_diameter_mm": 72.8,
+            "recist_long_mm": 70.9
+          },
+          "gt": {
+            "volume_cm3": 96.93,
+            "max_diameter_mm": 73.7,
+            "recist_long_mm": 70.2
+          }
+        },
+        "TC": {
+          "dice": 0.9269,
+          "hd95_mm": 12.21,
+          "pred": {
+            "volume_cm3": 61.15,
+            "max_diameter_mm": 57.3,
+            "recist_long_mm": 54.1
+          },
+          "gt": {
+            "volume_cm3": 55.39,
+            "max_diameter_mm": 63.5,
+            "recist_long_mm": 51.9
+          }
+        },
+        "ET": {
+          "dice": 0.8983,
+          "hd95_mm": 2.0,
+          "pred": {
+            "volume_cm3": 45.47,
+            "max_diameter_mm": 57.0,
+            "recist_long_mm": 51.7
+          },
+          "gt": {
+            "volume_cm3": 39.04,
+            "max_diameter_mm": 57.7,
+            "recist_long_mm": 50.5
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_176",
+      "seconds": 40.7,
+      "scores": {
+        "WT": {
+          "dice": 0.1913,
+          "hd95_mm": 23.43,
+          "pred": {
+            "volume_cm3": 1.11,
+            "max_diameter_mm": 26.2,
+            "recist_long_mm": 17.7
+          },
+          "gt": {
+            "volume_cm3": 10.44,
+            "max_diameter_mm": 57.1,
+            "recist_long_mm": 49.3
+          }
+        },
+        "TC": {
+          "dice": 0.0,
+          "hd95_mm": NaN,
+          "pred": {
+            "volume_cm3": 0.0,
+            "max_diameter_mm": 0.0,
+            "recist_long_mm": 0.0
+          },
+          "gt": {
+            "volume_cm3": 0.99,
+            "max_diameter_mm": 33.8,
+            "recist_long_mm": 22.8
+          }
+        },
+        "ET": {
+          "dice": 1.0,
+          "hd95_mm": 0.0,
+          "pred": {
+            "volume_cm3": 0.0,
+            "max_diameter_mm": 0.0,
+            "recist_long_mm": 0.0
+          },
+          "gt": {
+            "volume_cm3": 0.0,
+            "max_diameter_mm": 0.0,
+            "recist_long_mm": 0.0
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_185",
+      "seconds": 36.9,
+      "scores": {
+        "WT": {
+          "dice": 0.6873,
+          "hd95_mm": 9.22,
+          "pred": {
+            "volume_cm3": 16.73,
+            "max_diameter_mm": 59.7,
+            "recist_long_mm": 36.1
+          },
+          "gt": {
+            "volume_cm3": 31.82,
+            "max_diameter_mm": 74.4,
+            "recist_long_mm": 52.2
+          }
+        },
+        "TC": {
+          "dice": 0.0263,
+          "hd95_mm": 25.16,
+          "pred": {
+            "volume_cm3": 0.13,
+            "max_diameter_mm": 10.4,
+            "recist_long_mm": 10.0
+          },
+          "gt": {
+            "volume_cm3": 8.7,
+            "max_diameter_mm": 57.5,
+            "recist_long_mm": 40.0
+          }
+        },
+        "ET": {
+          "dice": 0.0,
+          "hd95_mm": NaN,
+          "pred": {
+            "volume_cm3": 0.0,
+            "max_diameter_mm": 0.0,
+            "recist_long_mm": 0.0
+          },
+          "gt": {
+            "volume_cm3": 0.11,
+            "max_diameter_mm": 14.2,
+            "recist_long_mm": 14.0
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_199",
+      "seconds": 34.4,
+      "scores": {
+        "WT": {
+          "dice": 0.7112,
+          "hd95_mm": 8.6,
+          "pred": {
+            "volume_cm3": 31.19,
+            "max_diameter_mm": 61.8,
+            "recist_long_mm": 55.6
+          },
+          "gt": {
+            "volume_cm3": 56.16,
+            "max_diameter_mm": 64.5,
+            "recist_long_mm": 60.7
+          }
+        },
+        "TC": {
+          "dice": 0.6,
+          "hd95_mm": 9.0,
+          "pred": {
+            "volume_cm3": 12.07,
+            "max_diameter_mm": 46.3,
+            "recist_long_mm": 41.2
+          },
+          "gt": {
+            "volume_cm3": 26.7,
+            "max_diameter_mm": 57.6,
+            "recist_long_mm": 55.1
+          }
+        },
+        "ET": {
+          "dice": 0.6862,
+          "hd95_mm": 8.54,
+          "pred": {
+            "volume_cm3": 8.28,
+            "max_diameter_mm": 45.2,
+            "recist_long_mm": 41.0
+          },
+          "gt": {
+            "volume_cm3": 14.94,
+            "max_diameter_mm": 48.6,
+            "recist_long_mm": 48.1
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_208",
+      "seconds": 33.0,
+      "scores": {
+        "WT": {
+          "dice": 0.8757,
+          "hd95_mm": 4.58,
+          "pred": {
+            "volume_cm3": 53.73,
+            "max_diameter_mm": 80.6,
+            "recist_long_mm": 71.3
+          },
+          "gt": {
+            "volume_cm3": 66.75,
+            "max_diameter_mm": 90.0,
+            "recist_long_mm": 87.1
+          }
+        },
+        "TC": {
+          "dice": 0.8741,
+          "hd95_mm": 3.61,
+          "pred": {
+            "volume_cm3": 34.99,
+            "max_diameter_mm": 70.7,
+            "recist_long_mm": 59.3
+          },
+          "gt": {
+            "volume_cm3": 38.76,
+            "max_diameter_mm": 71.2,
+            "recist_long_mm": 70.1
+          }
+        },
+        "ET": {
+          "dice": 0.8052,
+          "hd95_mm": 2.0,
+          "pred": {
+            "volume_cm3": 22.14,
+            "max_diameter_mm": 70.5,
+            "recist_long_mm": 59.2
+          },
+          "gt": {
+            "volume_cm3": 20.24,
+            "max_diameter_mm": 67.1,
+            "recist_long_mm": 65.0
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_243",
+      "seconds": 36.4,
+      "scores": {
+        "WT": {
+          "dice": 0.4887,
+          "hd95_mm": 15.36,
+          "pred": {
+            "volume_cm3": 26.19,
+            "max_diameter_mm": 52.9,
+            "recist_long_mm": 49.6
+          },
+          "gt": {
+            "volume_cm3": 80.88,
+            "max_diameter_mm": 69.6,
+            "recist_long_mm": 65.8
+          }
+        },
+        "TC": {
+          "dice": 0.3437,
+          "hd95_mm": 15.75,
+          "pred": {
+            "volume_cm3": 14.21,
+            "max_diameter_mm": 42.0,
+            "recist_long_mm": 38.6
+          },
+          "gt": {
+            "volume_cm3": 68.14,
+            "max_diameter_mm": 67.0,
+            "recist_long_mm": 62.1
+          }
+        },
+        "ET": {
+          "dice": 0.8016,
+          "hd95_mm": 1.73,
+          "pred": {
+            "volume_cm3": 2.39,
+            "max_diameter_mm": 34.8,
+            "recist_long_mm": 20.2
+          },
+          "gt": {
+            "volume_cm3": 3.26,
+            "max_diameter_mm": 37.5,
+            "recist_long_mm": 23.3
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_275",
+      "seconds": 35.4,
+      "scores": {
+        "WT": {
+          "dice": 0.8565,
+          "hd95_mm": 5.39,
+          "pred": {
+            "volume_cm3": 138.68,
+            "max_diameter_mm": 98.5,
+            "recist_long_mm": 93.9
+          },
+          "gt": {
+            "volume_cm3": 111.72,
+            "max_diameter_mm": 98.9,
+            "recist_long_mm": 89.3
+          }
+        },
+        "TC": {
+          "dice": 0.9335,
+          "hd95_mm": 2.45,
+          "pred": {
+            "volume_cm3": 61.42,
+            "max_diameter_mm": 59.8,
+            "recist_long_mm": 57.0
+          },
+          "gt": {
+            "volume_cm3": 58.67,
+            "max_diameter_mm": 64.4,
+            "recist_long_mm": 62.9
+          }
+        },
+        "ET": {
+          "dice": 0.8485,
+          "hd95_mm": 1.73,
+          "pred": {
+            "volume_cm3": 31.24,
+            "max_diameter_mm": 58.4,
+            "recist_long_mm": 56.3
+          },
+          "gt": {
+            "volume_cm3": 31.48,
+            "max_diameter_mm": 64.4,
+            "recist_long_mm": 62.9
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_279",
+      "seconds": 39.6,
+      "scores": {
+        "WT": {
+          "dice": 0.9015,
+          "hd95_mm": 4.58,
+          "pred": {
+            "volume_cm3": 191.65,
+            "max_diameter_mm": 107.4,
+            "recist_long_mm": 106.5
+          },
+          "gt": {
+            "volume_cm3": 187.57,
+            "max_diameter_mm": 114.8,
+            "recist_long_mm": 111.8
+          }
+        },
+        "TC": {
+          "dice": 0.8377,
+          "hd95_mm": 14.28,
+          "pred": {
+            "volume_cm3": 77.2,
+            "max_diameter_mm": 82.3,
+            "recist_long_mm": 81.9
+          },
+          "gt": {
+            "volume_cm3": 57.7,
+            "max_diameter_mm": 59.2,
+            "recist_long_mm": 59.0
+          }
+        },
+        "ET": {
+          "dice": 0.8414,
+          "hd95_mm": 3.0,
+          "pred": {
+            "volume_cm3": 44.74,
+            "max_diameter_mm": 80.3,
+            "recist_long_mm": 80.1
+          },
+          "gt": {
+            "volume_cm3": 36.58,
+            "max_diameter_mm": 58.6,
+            "recist_long_mm": 58.1
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_316",
+      "seconds": 33.9,
+      "scores": {
+        "WT": {
+          "dice": 0.9275,
+          "hd95_mm": 3.0,
+          "pred": {
+            "volume_cm3": 67.6,
+            "max_diameter_mm": 64.4,
+            "recist_long_mm": 59.8
+          },
+          "gt": {
+            "volume_cm3": 68.12,
+            "max_diameter_mm": 80.7,
+            "recist_long_mm": 62.3
+          }
+        },
+        "TC": {
+          "dice": 0.9048,
+          "hd95_mm": 2.45,
+          "pred": {
+            "volume_cm3": 29.81,
+            "max_diameter_mm": 49.6,
+            "recist_long_mm": 43.4
+          },
+          "gt": {
+            "volume_cm3": 30.64,
+            "max_diameter_mm": 52.4,
+            "recist_long_mm": 49.4
+          }
+        },
+        "ET": {
+          "dice": 0.815,
+          "hd95_mm": 2.24,
+          "pred": {
+            "volume_cm3": 19.4,
+            "max_diameter_mm": 48.7,
+            "recist_long_mm": 43.2
+          },
+          "gt": {
+            "volume_cm3": 18.22,
+            "max_diameter_mm": 52.4,
+            "recist_long_mm": 49.3
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_332",
+      "seconds": 27.2,
+      "scores": {
+        "WT": {
+          "dice": 0.7496,
+          "hd95_mm": 26.4,
+          "pred": {
+            "volume_cm3": 76.69,
+            "max_diameter_mm": 76.7,
+            "recist_long_mm": 75.0
+          },
+          "gt": {
+            "volume_cm3": 100.88,
+            "max_diameter_mm": 106.3,
+            "recist_long_mm": 83.3
+          }
+        },
+        "TC": {
+          "dice": 0.7687,
+          "hd95_mm": 24.49,
+          "pred": {
+            "volume_cm3": 37.61,
+            "max_diameter_mm": 62.6,
+            "recist_long_mm": 58.6
+          },
+          "gt": {
+            "volume_cm3": 37.23,
+            "max_diameter_mm": 62.7,
+            "recist_long_mm": 57.3
+          }
+        },
+        "ET": {
+          "dice": 0.6848,
+          "hd95_mm": 23.28,
+          "pred": {
+            "volume_cm3": 24.39,
+            "max_diameter_mm": 61.9,
+            "recist_long_mm": 58.2
+          },
+          "gt": {
+            "volume_cm3": 26.25,
+            "max_diameter_mm": 62.7,
+            "recist_long_mm": 57.3
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_353",
+      "seconds": 29.5,
+      "scores": {
+        "WT": {
+          "dice": 0.658,
+          "hd95_mm": 10.63,
+          "pred": {
+            "volume_cm3": 15.74,
+            "max_diameter_mm": 46.8,
+            "recist_long_mm": 36.4
+          },
+          "gt": {
+            "volume_cm3": 25.92,
+            "max_diameter_mm": 64.4,
+            "recist_long_mm": 60.2
+          }
+        },
+        "TC": {
+          "dice": 0.7938,
+          "hd95_mm": 6.71,
+          "pred": {
+            "volume_cm3": 2.86,
+            "max_diameter_mm": 26.0,
+            "recist_long_mm": 21.2
+          },
+          "gt": {
+            "volume_cm3": 2.07,
+            "max_diameter_mm": 21.5,
+            "recist_long_mm": 19.7
+          }
+        },
+        "ET": {
+          "dice": 0.7367,
+          "hd95_mm": 6.65,
+          "pred": {
+            "volume_cm3": 1.83,
+            "max_diameter_mm": 20.3,
+            "recist_long_mm": 19.4
+          },
+          "gt": {
+            "volume_cm3": 1.17,
+            "max_diameter_mm": 19.3,
+            "recist_long_mm": 18.6
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_384",
+      "seconds": 28.9,
+      "scores": {
+        "WT": {
+          "dice": 0.8499,
+          "hd95_mm": 5.74,
+          "pred": {
+            "volume_cm3": 61.37,
+            "max_diameter_mm": 80.6,
+            "recist_long_mm": 68.9
+          },
+          "gt": {
+            "volume_cm3": 73.83,
+            "max_diameter_mm": 88.2,
+            "recist_long_mm": 81.7
+          }
+        },
+        "TC": {
+          "dice": 0.8065,
+          "hd95_mm": 10.39,
+          "pred": {
+            "volume_cm3": 19.25,
+            "max_diameter_mm": 59.1,
+            "recist_long_mm": 45.8
+          },
+          "gt": {
+            "volume_cm3": 14.25,
+            "max_diameter_mm": 39.8,
+            "recist_long_mm": 36.7
+          }
+        },
+        "ET": {
+          "dice": 0.8164,
+          "hd95_mm": 5.74,
+          "pred": {
+            "volume_cm3": 13.08,
+            "max_diameter_mm": 45.3,
+            "recist_long_mm": 40.8
+          },
+          "gt": {
+            "volume_cm3": 10.91,
+            "max_diameter_mm": 39.8,
+            "recist_long_mm": 36.7
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_386",
+      "seconds": 28.5,
+      "scores": {
+        "WT": {
+          "dice": 0.8378,
+          "hd95_mm": 5.1,
+          "pred": {
+            "volume_cm3": 64.65,
+            "max_diameter_mm": 75.3,
+            "recist_long_mm": 71.4
+          },
+          "gt": {
+            "volume_cm3": 80.22,
+            "max_diameter_mm": 85.0,
+            "recist_long_mm": 84.4
+          }
+        },
+        "TC": {
+          "dice": 0.8625,
+          "hd95_mm": 4.58,
+          "pred": {
+            "volume_cm3": 27.35,
+            "max_diameter_mm": 52.9,
+            "recist_long_mm": 42.1
+          },
+          "gt": {
+            "volume_cm3": 30.66,
+            "max_diameter_mm": 48.9,
+            "recist_long_mm": 40.2
+          }
+        },
+        "ET": {
+          "dice": 0.7186,
+          "hd95_mm": 3.0,
+          "pred": {
+            "volume_cm3": 11.55,
+            "max_diameter_mm": 46.7,
+            "recist_long_mm": 38.2
+          },
+          "gt": {
+            "volume_cm3": 18.88,
+            "max_diameter_mm": 47.7,
+            "recist_long_mm": 40.2
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_388",
+      "seconds": 30.7,
+      "scores": {
+        "WT": {
+          "dice": 0.9414,
+          "hd95_mm": 2.24,
+          "pred": {
+            "volume_cm3": 118.76,
+            "max_diameter_mm": 83.9,
+            "recist_long_mm": 79.4
+          },
+          "gt": {
+            "volume_cm3": 110.21,
+            "max_diameter_mm": 83.2,
+            "recist_long_mm": 80.6
+          }
+        },
+        "TC": {
+          "dice": 0.8747,
+          "hd95_mm": 13.34,
+          "pred": {
+            "volume_cm3": 38.21,
+            "max_diameter_mm": 66.0,
+            "recist_long_mm": 64.5
+          },
+          "gt": {
+            "volume_cm3": 33.81,
+            "max_diameter_mm": 50.0,
+            "recist_long_mm": 45.2
+          }
+        },
+        "ET": {
+          "dice": 0.8841,
+          "hd95_mm": 3.74,
+          "pred": {
+            "volume_cm3": 28.6,
+            "max_diameter_mm": 51.5,
+            "recist_long_mm": 43.2
+          },
+          "gt": {
+            "volume_cm3": 29.06,
+            "max_diameter_mm": 50.0,
+            "recist_long_mm": 45.2
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_400",
+      "seconds": 28.4,
+      "scores": {
+        "WT": {
+          "dice": 0.9562,
+          "hd95_mm": 2.24,
+          "pred": {
+            "volume_cm3": 124.71,
+            "max_diameter_mm": 78.2,
+            "recist_long_mm": 75.2
+          },
+          "gt": {
+            "volume_cm3": 130.29,
+            "max_diameter_mm": 81.5,
+            "recist_long_mm": 75.2
+          }
+        },
+        "TC": {
+          "dice": 0.8615,
+          "hd95_mm": 4.69,
+          "pred": {
+            "volume_cm3": 40.87,
+            "max_diameter_mm": 53.2,
+            "recist_long_mm": 51.9
+          },
+          "gt": {
+            "volume_cm3": 53.79,
+            "max_diameter_mm": 57.3,
+            "recist_long_mm": 55.7
+          }
+        },
+        "ET": {
+          "dice": 0.4667,
+          "hd95_mm": 9.9,
+          "pred": {
+            "volume_cm3": 9.11,
+            "max_diameter_mm": 50.4,
+            "recist_long_mm": 49.6
+          },
+          "gt": {
+            "volume_cm3": 29.91,
+            "max_diameter_mm": 57.0,
+            "recist_long_mm": 55.7
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_428",
+      "seconds": 28.1,
+      "scores": {
+        "WT": {
+          "dice": 0.8563,
+          "hd95_mm": 6.32,
+          "pred": {
+            "volume_cm3": 54.42,
+            "max_diameter_mm": 61.2,
+            "recist_long_mm": 57.0
+          },
+          "gt": {
+            "volume_cm3": 70.78,
+            "max_diameter_mm": 71.7,
+            "recist_long_mm": 70.9
+          }
+        },
+        "TC": {
+          "dice": 0.6732,
+          "hd95_mm": 12.55,
+          "pred": {
+            "volume_cm3": 25.62,
+            "max_diameter_mm": 52.2,
+            "recist_long_mm": 46.2
+          },
+          "gt": {
+            "volume_cm3": 49.35,
+            "max_diameter_mm": 59.7,
+            "recist_long_mm": 50.2
+          }
+        },
+        "ET": {
+          "dice": 0.7572,
+          "hd95_mm": 5.0,
+          "pred": {
+            "volume_cm3": 16.34,
+            "max_diameter_mm": 51.7,
+            "recist_long_mm": 44.6
+          },
+          "gt": {
+            "volume_cm3": 26.42,
+            "max_diameter_mm": 59.6,
+            "recist_long_mm": 48.5
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_459",
+      "seconds": 29.9,
+      "scores": {
+        "WT": {
+          "dice": 0.7879,
+          "hd95_mm": 4.12,
+          "pred": {
+            "volume_cm3": 12.22,
+            "max_diameter_mm": 38.3,
+            "recist_long_mm": 37.2
+          },
+          "gt": {
+            "volume_cm3": 12.95,
+            "max_diameter_mm": 39.0,
+            "recist_long_mm": 37.7
+          }
+        },
+        "TC": {
+          "dice": 0.5467,
+          "hd95_mm": 7.87,
+          "pred": {
+            "volume_cm3": 2.15,
+            "max_diameter_mm": 29.6,
+            "recist_long_mm": 24.2
+          },
+          "gt": {
+            "volume_cm3": 1.24,
+            "max_diameter_mm": 20.3,
+            "recist_long_mm": 20.2
+          }
+        },
+        "ET": {
+          "dice": 0.582,
+          "hd95_mm": 8.06,
+          "pred": {
+            "volume_cm3": 1.5,
+            "max_diameter_mm": 29.2,
+            "recist_long_mm": 23.7
+          },
+          "gt": {
+            "volume_cm3": 1.04,
+            "max_diameter_mm": 20.3,
+            "recist_long_mm": 20.2
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_463",
+      "seconds": 28.2,
+      "scores": {
+        "WT": {
+          "dice": 0.9063,
+          "hd95_mm": 4.0,
+          "pred": {
+            "volume_cm3": 90.61,
+            "max_diameter_mm": 79.4,
+            "recist_long_mm": 74.3
+          },
+          "gt": {
+            "volume_cm3": 107.33,
+            "max_diameter_mm": 85.0,
+            "recist_long_mm": 82.1
+          }
+        },
+        "TC": {
+          "dice": 0.9052,
+          "hd95_mm": 3.74,
+          "pred": {
+            "volume_cm3": 38.16,
+            "max_diameter_mm": 53.4,
+            "recist_long_mm": 51.1
+          },
+          "gt": {
+            "volume_cm3": 41.67,
+            "max_diameter_mm": 57.4,
+            "recist_long_mm": 54.2
+          }
+        },
+        "ET": {
+          "dice": 0.8856,
+          "hd95_mm": 2.0,
+          "pred": {
+            "volume_cm3": 29.43,
+            "max_diameter_mm": 53.2,
+            "recist_long_mm": 49.4
+          },
+          "gt": {
+            "volume_cm3": 34.54,
+            "max_diameter_mm": 57.4,
+            "recist_long_mm": 54.2
+          }
+        }
+      }
+    },
+    {
+      "case": "BRATS_482",
+      "seconds": 30.4,
+      "scores": {
+        "WT": {
+          "dice": 0.8044,
+          "hd95_mm": 13.11,
+          "pred": {
+            "volume_cm3": 131.61,
+            "max_diameter_mm": 90.8,
+            "recist_long_mm": 89.2
+          },
+          "gt": {
+            "volume_cm3": 184.72,
+            "max_diameter_mm": 106.1,
+            "recist_long_mm": 101.1
+          }
+        },
+        "TC": {
+          "dice": 0.6992,
+          "hd95_mm": 11.45,
+          "pred": {
+            "volume_cm3": 71.6,
+            "max_diameter_mm": 71.5,
+            "recist_long_mm": 68.7
+          },
+          "gt": {
+            "volume_cm3": 100.04,
+            "max_diameter_mm": 83.6,
+            "recist_long_mm": 75.7
+          }
+        },
+        "ET": {
+          "dice": 0.586,
+          "hd95_mm": 12.88,
+          "pred": {
+            "volume_cm3": 22.62,
+            "max_diameter_mm": 70.7,
+            "recist_long_mm": 60.1
+          },
+          "gt": {
+            "volume_cm3": 27.85,
+            "max_diameter_mm": 82.9,
+            "recist_long_mm": 74.1
+          }
+        }
+      }
+    }
+  ]
+}
