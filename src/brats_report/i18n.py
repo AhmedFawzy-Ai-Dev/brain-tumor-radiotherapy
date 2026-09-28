@@ -21,32 +21,59 @@ def register_fonts() -> tuple[str, str]:
     global _FONT_NAME, _FONT_BOLD, _registered
     if _registered:
         return _FONT_NAME, _FONT_BOLD
+    import matplotlib
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
 
+    # DejaVu Sans ships with matplotlib (a dependency) and covers Arabic, so there
+    # is always a fallback on Linux / macOS / CI, where the Windows fonts are absent.
+    mpl_fonts = Path(matplotlib.get_data_path()) / "fonts" / "ttf"
     candidates = [
-        ("ArabicFont", "ArabicFont-Bold", "C:/Windows/Fonts/arial.ttf", "C:/Windows/Fonts/arialbd.ttf"),
-        ("ArabicFont", "ArabicFont-Bold", "C:/Windows/Fonts/tahoma.ttf", "C:/Windows/Fonts/tahomabd.ttf"),
-        ("ArabicFont", "ArabicFont-Bold", "C:/Windows/Fonts/segoeui.ttf", "C:/Windows/Fonts/segoeuib.ttf"),
+        ("C:/Windows/Fonts/arial.ttf", "C:/Windows/Fonts/arialbd.ttf"),
+        ("C:/Windows/Fonts/tahoma.ttf", "C:/Windows/Fonts/tahomabd.ttf"),
+        ("/usr/share/fonts/truetype/noto/NotoSansArabic-Regular.ttf",
+         "/usr/share/fonts/truetype/noto/NotoSansArabic-Bold.ttf"),
+        ("/System/Library/Fonts/Supplemental/Arial.ttf",
+         "/System/Library/Fonts/Supplemental/Arial Bold.ttf"),
+        (str(mpl_fonts / "DejaVuSans.ttf"), str(mpl_fonts / "DejaVuSans-Bold.ttf")),
     ]
-    for reg, bold, rpath, bpath in candidates:
+    for rpath, bpath in candidates:
         if Path(rpath).exists():
-            pdfmetrics.registerFont(TTFont(reg, rpath))
-            pdfmetrics.registerFont(TTFont(bold, bpath if Path(bpath).exists() else rpath))
-            _FONT_NAME, _FONT_BOLD = reg, bold
+            pdfmetrics.registerFont(TTFont("ArabicFont", rpath))
+            pdfmetrics.registerFont(TTFont("ArabicFont-Bold",
+                                           bpath if Path(bpath).exists() else rpath))
+            _FONT_NAME, _FONT_BOLD = "ArabicFont", "ArabicFont-Bold"
             break
     _registered = True
     return _FONT_NAME, _FONT_BOLD
 
 
 def ar(text: str) -> str:
-    """Reshape + bidi-reorder Arabic text for correct ReportLab rendering."""
+    """Reshape + bidi-reorder one line of Arabic text for ReportLab (visual order)."""
     try:
         import arabic_reshaper
         from bidi.algorithm import get_display
-        return get_display(arabic_reshaper.reshape(text))
+        return get_display(arabic_reshaper.reshape(text), base_dir="R")
     except Exception:  # noqa: BLE001 - if libs missing, fall back to raw text
         return text
+
+
+def ar_para(text: str, font: str, size: float, width: float) -> str:
+    """Arabic that may span several lines, as ReportLab paragraph markup.
+
+    Reordering first and letting ReportLab wrap the result puts the lines in the
+    wrong order (the reordered string starts with the *end* of the sentence), so
+    wrap in logical order at ``width`` points, then reorder each line on its own
+    and join them with explicit line breaks.
+    """
+    try:
+        import arabic_reshaper
+        from bidi.algorithm import get_display
+        from reportlab.lib.utils import simpleSplit
+    except Exception:  # noqa: BLE001 - if libs missing, fall back to raw text
+        return text
+    lines = simpleSplit(arabic_reshaper.reshape(text), font, size, width)
+    return "<br/>".join(get_display(line, base_dir="R") for line in lines)
 
 
 # --- translations (raw Arabic; wrap with ar() only for the PDF) --------------

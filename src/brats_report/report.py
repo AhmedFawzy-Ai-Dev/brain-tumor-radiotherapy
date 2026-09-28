@@ -16,6 +16,7 @@ import numpy as np
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib import patheffects  # noqa: E402
 
 from . import DISCLAIMER, MODALITIES, REGION_NAMES, __version__, i18n  # noqa: E402
 from .io import Scan  # noqa: E402
@@ -32,10 +33,21 @@ def _key_slice(label: np.ndarray, zax: int) -> int:
     return int(np.argmax(areas)) if any(areas) else label.shape[zax] // 2
 
 
+_OPPOSITE = {"R": "L", "L": "R", "A": "P", "P": "A", "S": "I", "I": "S"}
+
+
 def render_slice(scan: Scan, label: np.ndarray, out_png: Path,
-                 display_modality: str = "FLAIR") -> int:
+                 display_modality: str = "FLAIR", meas: dict | None = None) -> int:
+    """Draw one axial slice with the tumour regions overlaid.
+
+    With ``meas`` the slice is the one the whole-tumour RECIST diameter was
+    measured on, and that diameter is drawn with its length, so the picture shows
+    exactly the number in the report. Displayed in radiological convention
+    (patient's right on the image's left), with orientation letters on the edges.
+    """
     zax = _slice_axis(scan.axcodes)
-    k = _key_slice(label, zax)
+    wt = meas.get("WT") if meas else None
+    k = wt.recist_slice if wt is not None and wt.present else _key_slice(label, zax)
     mod = MODALITIES.index(display_modality) if scan.is_multimodal else 0
 
     img = np.take(scan.data[..., mod] if scan.is_multimodal else scan.data, k, axis=zax)
@@ -48,18 +60,51 @@ def render_slice(scan: Scan, label: np.ndarray, out_png: Path,
         m = lab > 0 if r == "WT" else (lab >= 2 if r == "TC" else lab == 3)
         rgb[m] = rgb[m] * 0.45 + np.array(REGION_RGB[r]) * 0.55
 
+    # slice array axes (i0, i1) -> display: columns follow i0, rows run against i1
+    # (top = the direction i1 increases toward); flip columns if i0 increases
+    # toward the patient's right, so the right side is drawn on the left.
+    i0, i1 = (a for a in range(3) if a != zax)
+    n0, n1 = lab.shape
+    flip = scan.axcodes[i0] == "R"
+    disp = rgb.transpose(1, 0, 2)[::-1]
+    if flip:
+        disp = disp[:, ::-1]
+
+    def to_xy(p0, p1):
+        return (n0 - 1 - p0 if flip else p0), n1 - 1 - p1
+
     fig, ax = plt.subplots(figsize=(5, 5), dpi=130)
-    ax.imshow(np.rot90(rgb))
+    ax.imshow(disp)
     ax.axis("off")
-    ys, xs = np.nonzero(lab > 0)
-    if len(xs) > 1:
-        pts = np.column_stack([xs, ys]).astype(float)
-        _, a, b = _max_caliper(pts)
-        h = rgb.shape[0]
-        ax.plot([a[1], b[1]], [h - 1 - a[0], h - 1 - b[0]], "-", color="cyan",
-                lw=1.4, marker="o", ms=3)
+    sp0, sp1 = scan.spacing[i0], scan.spacing[i1]
+    lesion = lab > 0
+    if wt is not None and wt.present:
+        from .measure import largest_component, region_mask
+        main3d, _ = largest_component(region_mask(label, "WT"))
+        lesion = np.take(main3d, k, axis=zax)
+    p0, p1 = np.nonzero(lesion)
+    if len(p0) > 1:
+        _, a, b = _max_caliper(np.column_stack([p0 * sp0, p1 * sp1]).astype(float))
+        (xa, ya), (xb, yb) = to_xy(a[0] / sp0, a[1] / sp1), to_xy(b[0] / sp0, b[1] / sp1)
+        ax.plot([xa, xb], [ya, yb], "-", color="cyan", lw=1.4, marker="o", ms=3)
+        if wt is not None and wt.present:
+            ax.annotate(f"{wt.recist_long_mm:.0f} mm", ((xa + xb) / 2, (ya + yb) / 2),
+                        xytext=(0, 9), textcoords="offset points", ha="center",
+                        fontsize=8, color="cyan", fontweight="bold",
+                        path_effects=[patheffects.withStroke(linewidth=2, foreground="black")])
+
+    codes = scan.axcodes
+    right_edge = _OPPOSITE[codes[i0]] if flip else codes[i0]
+    for text, xy, ha, va in ((codes[i1], (0.5, 0.985), "center", "top"),
+                             (_OPPOSITE[codes[i1]], (0.5, 0.015), "center", "bottom"),
+                             (_OPPOSITE[right_edge], (0.012, 0.5), "left", "center"),
+                             (right_edge, (0.988, 0.5), "right", "center")):
+        ax.text(*xy, text, transform=ax.transAxes, ha=ha, va=va, fontsize=9,
+                color="white", fontweight="bold")
 
     title = f"{display_modality}  |  axial slice {k}" if scan.is_multimodal else "MRI (2-D input)"
+    if wt is not None and wt.present:
+        title += f"  |  longest diameter {wt.recist_long_mm:.0f} x {wt.recist_short_mm:.0f} mm"
     ax.set_title(title, fontsize=9)
     handles = [plt.Line2D([0], [0], marker="s", ls="", markersize=9,
                           markerfacecolor=REGION_RGB[r], markeredgecolor="none",
@@ -117,6 +162,14 @@ def _findings_bilingual(meas: dict, tumour_type: dict | None = None) -> list[tup
         f"ثلاثي الأبعاد {wt.max_diameter_mm:.0f} مم."))
     out.append((f"Approximate location: {wt.location}.",
                 f"الموقع التقريبي: {i18n.loc_ar(wt.location)}."))
+    if wt.large_pieces > 1:
+        out.append((
+            f"Note: the whole tumour has {wt.large_pieces} separate regions of at least 1 cm3; "
+            f"the diameters, extents and location above describe the largest "
+            f"({wt.largest_piece_cm3:.1f} cm3), while the volume includes all of them.",
+            f"ملاحظة: الورم الكامل مكوَّن من {wt.large_pieces} مناطق منفصلة حجم كلٍّ منها "
+            f"1 سم³ على الأقل؛ الأقطار والأبعاد والموقع أعلاه للمنطقة الأكبر "
+            f"({wt.largest_piece_cm3:.1f} سم³)، بينما يشمل الحجم كل المناطق."))
     for r in ("TC", "ET"):
         m = meas[r]
         if m.present:
@@ -131,7 +184,9 @@ def measurements_to_dict(meas: dict) -> dict:
     return {r: {"present": m.present, "volume_cm3": m.volume_cm3, "extent_mm": m.extent_mm,
                 "max_diameter_mm": m.max_diameter_mm, "recist_long_mm": m.recist_long_mm,
                 "recist_short_mm": m.recist_short_mm, "recist_slice": m.recist_slice,
-                "location": m.location} for r, m in meas.items()}
+                "location": m.location, "components": m.components,
+                "large_pieces": m.large_pieces, "largest_piece_cm3": m.largest_piece_cm3}
+            for r, m in meas.items()}
 
 
 # --- Markdown (bilingual) ----------------------------------------------------
@@ -188,11 +243,24 @@ def write_pdf(meas, meta, model_info, image_png, out_pdf, tumour_type=None):
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.lib.units import mm as MM
-    from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+    from reportlab.lib.utils import ImageReader
+    from reportlab.platypus import (
+        Image,
+        KeepTogether,
+        Paragraph,
+        SimpleDocTemplate,
+        Spacer,
+        Table,
+        TableStyle,
+    )
 
     AR, ARB = i18n.register_fonts()
     ar = i18n.ar
     styles = getSampleStyleSheet()
+    # headings carry Arabic too, so they need the Arabic-capable font
+    h2 = ParagraphStyle("h2", parent=styles["Heading2"], fontName=ARB)
+    title = ParagraphStyle("title", parent=styles["Title"], fontName=ARB)
+    body_w = 180 * MM
     small = ParagraphStyle("s", parent=styles["Normal"], fontSize=8, leading=10)
     # NB: text is pre-shaped + bidi-reordered (visual order), so draw LTR and
     # right-align - do NOT set wordWrap="RTL" or it double-reverses.
@@ -202,19 +270,26 @@ def write_pdf(meas, meta, model_info, image_png, out_pdf, tumour_type=None):
                              textColor=colors.white, alignment=TA_RIGHT)
     navy, red, zebra = colors.HexColor("#1f3a5f"), colors.HexColor("#b00020"), colors.HexColor("#eef2f7")
 
-    def cell(en, arb=None):
-        txt = en if arb is None else f"{en}\n{ar(arb)}"
-        return Paragraph(txt.replace("\n", "<br/>"),
-                         ParagraphStyle("c", fontName=AR, fontSize=7.3, leading=8.6))
+    def cell(en, arb=None, width=None, header=False):
+        """Table cell; ``width`` (the column width) lets long Arabic wrap correctly.
+        Header cells set their own white text: a table's TEXTCOLOR doesn't reach
+        Paragraphs."""
+        txt = en.replace("\n", "<br/>")
+        if arb is not None:
+            txt += "<br/>" + (i18n.ar_para(arb, AR, 7.3, width - 14) if width else ar(arb))
+        return Paragraph(txt, ParagraphStyle("c", fontName=ARB if header else AR, fontSize=7.3,
+                                             leading=8.6,
+                                             textColor=colors.white if header else colors.black))
 
     doc = SimpleDocTemplate(str(out_pdf), pagesize=A4, topMargin=13 * MM,
                             bottomMargin=13 * MM, leftMargin=15 * MM, rightMargin=15 * MM)
-    E = [Paragraph(f"{i18n.TITLE_EN}", styles["Title"]),
+    E = [Paragraph(f"{i18n.TITLE_EN}", title),
          Paragraph(ar(i18n.TITLE_AR), ParagraphStyle("tar", parent=styles["Title"],
                                                      fontName=ARB, alignment=TA_RIGHT))]
 
-    dis = Table([[Paragraph("&#9888; " + DISCLAIMER, band)],
-                 [Paragraph(ar(i18n.DISCLAIMER_AR), band_ar)]], colWidths=[180 * MM])
+    dis = Table([[Paragraph(DISCLAIMER, band)],
+                 [Paragraph(i18n.ar_para(i18n.DISCLAIMER_AR, AR, 8.5, body_w - 16), band_ar)]],
+                colWidths=[body_w])
     dis.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), red),
                              ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
                              ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4)]))
@@ -236,9 +311,9 @@ def write_pdf(meas, meta, model_info, image_png, out_pdf, tumour_type=None):
         E += [tb, Spacer(1, 8)]
 
     # scan metadata
-    rows = [[cell("Scan metadata", "بيانات الفحص"), ""]]
+    rows = [[cell("Scan metadata", "بيانات الفحص", body_w, header=True), ""]]
     for k, v in meta.items():
-        rows.append([cell(k, i18n.FIELD.get(k, k)), cell(str(v))])
+        rows.append([cell(k, i18n.FIELD.get(k, k), 55 * MM), cell(str(v))])
     mt = Table(rows, colWidths=[55 * MM, 125 * MM])
     mt.setStyle(TableStyle([("SPAN", (0, 0), (1, 0)), ("BACKGROUND", (0, 0), (-1, 0), navy),
                             ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
@@ -247,18 +322,19 @@ def write_pdf(meas, meta, model_info, image_png, out_pdf, tumour_type=None):
     E += [mt, Spacer(1, 8)]
 
     # findings
-    E.append(Paragraph("Findings / " + ar(i18n.HEAD["Findings"]), styles["Heading2"]))
+    E.append(Paragraph("Findings / " + ar(i18n.HEAD["Findings"]), h2))
     for en, arb in _findings_bilingual(meas, tumour_type):
         E.append(Paragraph("&bull; " + en, small))
-        E.append(Paragraph(ar("• " + arb), small_ar))
+        E.append(Paragraph(i18n.ar_para("• " + arb, AR, 8, body_w - 4), small_ar))
         E.append(Spacer(1, 2))
     E.append(Spacer(1, 4))
 
     # classification probabilities
     if tumour_type and tumour_type.get("probs"):
         E.append(Paragraph("Classification / " + ar(i18n.HEAD["Classification (tumour type)"]),
-                           styles["Heading2"]))
-        prow = [[cell("Class", "الفئة"), cell("Probability", "الاحتمال")]]
+                           h2))
+        prow = [[cell("Class", "الفئة", 60 * MM, header=True),
+                 cell("Probability", "الاحتمال", 40 * MM, header=True)]]
         for c, p in sorted(tumour_type["probs"].items(), key=lambda kv: -kv[1]):
             prow.append([cell(c), cell(f"{p*100:.1f}%")])
         pt = Table(prow, colWidths=[60 * MM, 40 * MM])
@@ -269,23 +345,24 @@ def write_pdf(meas, meta, model_info, image_png, out_pdf, tumour_type=None):
         E += [pt, Spacer(1, 8)]
 
     # measurements
-    E.append(Paragraph("Measurements / " + ar(i18n.HEAD["Measurements"]), styles["Heading2"]))
+    E.append(Paragraph("Measurements / " + ar(i18n.HEAD["Measurements"]), h2))
     cols = ["Region", "Volume (cm3)", "LR (mm)", "AP (mm)", "SI (mm)",
             "Max 3D (mm)", "RECIST long x short (mm)", "Location"]
-    head = [cell(c.replace(" x ", " x\n"), i18n.COL_AR[c]) for c in cols]
+    widths = [w * MM for w in (26, 20, 18, 18, 18, 20, 26, 34)]
+    head = [cell(c.replace(" x ", " x\n"), i18n.COL_AR[c], w, header=True)
+            for c, w in zip(cols, widths, strict=True)]
     trows = [head]
     for r, m in meas.items():
         if not m.present:
-            trows.append([cell(r, i18n.REGION_AR[r])] + [cell("-")] * 7)
+            trows.append([cell(r, i18n.REGION_AR[r], widths[0])] + [cell("-")] * 7)
             continue
         e = m.extent_mm
         trows.append([
-            cell(r, i18n.REGION_AR[r]), cell(f"{m.volume_cm3:.1f}"),
+            cell(r, i18n.REGION_AR[r], widths[0]), cell(f"{m.volume_cm3:.1f}"),
             cell(str(e.get("LR", "-"))), cell(str(e.get("AP", "-"))), cell(str(e.get("SI", "-"))),
             cell(f"{m.max_diameter_mm:.0f}"), cell(f"{m.recist_long_mm:.0f} x {m.recist_short_mm:.0f}"),
-            cell(m.location, i18n.loc_ar(m.location))])
-    mtab = Table(trows, colWidths=[26 * MM, 20 * MM, 18 * MM, 18 * MM, 18 * MM,
-                                   20 * MM, 26 * MM, 34 * MM])
+            cell(m.location, i18n.loc_ar(m.location), widths[7])])
+    mtab = Table(trows, colWidths=widths)
     mtab.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, 0), navy),
                               ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                               ("GRID", (0, 0), (-1, -1), 0.3, colors.grey),
@@ -294,9 +371,11 @@ def write_pdf(meas, meta, model_info, image_png, out_pdf, tumour_type=None):
     E += [mtab, Spacer(1, 8)]
 
     if Path(image_png).exists():
-        E.append(Paragraph("Annotated key slice / " + ar(i18n.HEAD["Annotated key slice"]),
-                           styles["Heading2"]))
-        E.append(Image(str(image_png), width=92 * MM, height=92 * MM))
+        # heading and picture on the same page, picture at its own aspect ratio
+        iw, ih = ImageReader(str(image_png)).getSize()
+        E.append(KeepTogether([
+            Paragraph("Annotated key slice / " + ar(i18n.HEAD["Annotated key slice"]), h2),
+            Image(str(image_png), width=100 * MM, height=100 * MM * ih / iw)]))
     E.append(Spacer(1, 6))
     foot = (f"Segmentation: {model_info.get('name','UNet2D')} "
             f"(val Dice {model_info.get('val_dice_mean','n/a')}). ")
@@ -305,7 +384,7 @@ def write_pdf(meas, meta, model_info, image_png, out_pdf, tumour_type=None):
     foot += f"brats_report v{__version__}. {meta.get('Generated')}."
     E.append(Paragraph(foot, small))
     E.append(Paragraph("<i>" + DISCLAIMER + "</i>", small))
-    E.append(Paragraph(ar(i18n.DISCLAIMER_AR), small_ar))
+    E.append(Paragraph(i18n.ar_para(i18n.DISCLAIMER_AR, AR, 8, body_w - 4), small_ar))
     doc.build(E)
 
 
@@ -412,6 +491,8 @@ def _write_pdf_2d(findings, meta, m2d, model_info, image_png, out_pdf, tumour_ty
     AR, ARB = i18n.register_fonts()
     ar = i18n.ar
     styles = getSampleStyleSheet()
+    h2 = ParagraphStyle("h2", parent=styles["Heading2"], fontName=ARB)
+    body_w = 178 * MM
     small = ParagraphStyle("s", parent=styles["Normal"], fontSize=8.5, leading=11)
     small_ar = ParagraphStyle("sar", parent=small, fontName=AR, alignment=TA_RIGHT)
     band_ar = ParagraphStyle("bar", fontName=AR, fontSize=8.5, leading=12,
@@ -420,12 +501,14 @@ def _write_pdf_2d(findings, meta, m2d, model_info, image_png, out_pdf, tumour_ty
 
     doc = SimpleDocTemplate(str(out_pdf), pagesize=A4, topMargin=14 * MM,
                             bottomMargin=14 * MM, leftMargin=16 * MM, rightMargin=16 * MM)
-    E = [Paragraph(i18n.TITLE_EN, styles["Title"]),
+    E = [Paragraph(i18n.TITLE_EN, ParagraphStyle("title", parent=styles["Title"],
+                                                 fontName=ARB)),
          Paragraph(ar(i18n.TITLE_AR), ParagraphStyle("t", parent=styles["Title"],
                                                      fontName=ARB, alignment=TA_RIGHT))]
-    dis = Table([[Paragraph("&#9888; " + DISCLAIMER,
+    dis = Table([[Paragraph(DISCLAIMER,
                             ParagraphStyle("b", fontSize=8.5, leading=11, textColor=colors.white))],
-                 [Paragraph(ar(i18n.DISCLAIMER_AR), band_ar)]], colWidths=[178 * MM])
+                 [Paragraph(i18n.ar_para(i18n.DISCLAIMER_AR, AR, 8.5, body_w - 16), band_ar)]],
+                colWidths=[body_w])
     dis.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), red),
                              ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
                              ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4)]))
@@ -445,19 +528,19 @@ def _write_pdf_2d(findings, meta, m2d, model_info, image_png, out_pdf, tumour_ty
                                 ("TOPPADDING", (0, 0), (-1, -1), 5), ("BOTTOMPADDING", (0, 0), (-1, -1), 5)]))
         E += [tb, Spacer(1, 8)]
 
-    E.append(Paragraph("Findings / " + ar("النتائج"), styles["Heading2"]))
+    E.append(Paragraph("Findings / " + ar("النتائج"), h2))
     for en, arb in findings:
         E.append(Paragraph("&bull; " + en, small))
-        E.append(Paragraph(ar("• " + arb), small_ar))
+        E.append(Paragraph(i18n.ar_para("• " + arb, AR, 8.5, body_w - 4), small_ar))
         E.append(Spacer(1, 2))
     if Path(image_png).exists():
-        E += [Spacer(1, 6), Paragraph("Tumour outline / " + ar("حدود الورم"), styles["Heading2"]),
+        E += [Spacer(1, 6), Paragraph("Tumour outline / " + ar("حدود الورم"), h2),
               Image(str(image_png), width=95 * MM, height=95 * MM)]
     E += [Spacer(1, 6),
           Paragraph(f"2-D segmenter: {model_info.get('name','UNet2D')} "
                     f"(val Dice {model_info.get('val_dice','n/a')}). {meta.get('Generated')}.", small),
           Paragraph("<i>" + DISCLAIMER + "</i>", small),
-          Paragraph(ar(i18n.DISCLAIMER_AR), small_ar)]
+          Paragraph(i18n.ar_para(i18n.DISCLAIMER_AR, AR, 8.5, body_w - 4), small_ar)]
     doc.build(E)
 
 
@@ -467,7 +550,7 @@ def generate_report(scan: Scan, label: np.ndarray, meas: dict, out_dir,
     out_dir.mkdir(parents=True, exist_ok=True)
     model_info = model_info or {}
     png = out_dir / f"{stem}_slice.png"
-    key = render_slice(scan, label, png)
+    key = render_slice(scan, label, png, meas=meas)
 
     meta = {"Source": Path(scan.source).name or scan.source,
             "Volume shape": " x ".join(map(str, scan.data.shape)),

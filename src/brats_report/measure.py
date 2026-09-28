@@ -4,17 +4,28 @@ Everything here is geometry on the predicted mask - no learning - so it is exact
 and unit-testable against phantoms of known size (see ``synthetic.py`` / tests).
 
 For each reporting region (whole tumour, tumour core, enhancing tumour) we report:
-  * volume in cm3 (millilitres),
+  * volume in cm3 (millilitres) - every voxel of the region (total tumour burden),
   * anatomical bounding extents LR / AP / SI in mm,
   * the maximum 3-D calliper diameter in mm,
   * the RECIST-style longest axial diameter and its perpendicular in mm,
   * an approximate anatomical location of the centroid.
+
+The geometric measurements (extents, diameters, location) are taken on the
+**largest connected lesion**, not on every voxel of the region: a calliper
+distance is decided by its two extreme points, so a speck of a few voxels
+elsewhere in the brain would otherwise stretch the "diameter" across the gap
+(on one BraTS expert mask this turned a ~53 mm lesion into a 107 mm RECIST
+diameter). The number of separate pieces is reported as ``components``, and the
+number of pieces of at least 1 cm3 as ``large_pieces``: when that is more than
+one (a second sizeable region, not a speck), the report says so, because the
+diameters then describe only the largest one.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 
 import numpy as np
+from scipy import ndimage
 from scipy.spatial import ConvexHull, QhullError
 
 from . import REGIONS
@@ -87,6 +98,9 @@ class RegionMeasurement:
     recist_slice: int = -1
     location: str = ""
     present: bool = True
+    components: int = 0                                 # separate 3-D pieces
+    large_pieces: int = 0                               # pieces of >= 1 cm3
+    largest_piece_cm3: float = 0.0
 
 
 def region_mask(label: np.ndarray, region: str) -> np.ndarray:
@@ -110,15 +124,33 @@ def _location(mask: np.ndarray, axcodes: tuple) -> str:
     return ", ".join(words) if words else "central / midline"
 
 
+def pieces(mask: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """(label map, voxel count of each piece) of a mask's connected pieces, with
+    full (8- / 26-) connectivity so diagonal neighbours count as touching."""
+    lab, _ = ndimage.label(mask, structure=np.ones((3,) * mask.ndim))
+    return lab, np.bincount(lab.ravel())[1:]
+
+
+def largest_component(mask: np.ndarray) -> tuple[np.ndarray, int]:
+    """(largest connected piece of ``mask``, number of pieces)."""
+    lab, sizes = pieces(mask)
+    if len(sizes) <= 1:
+        return mask, len(sizes)
+    return lab == (np.argmax(sizes) + 1), len(sizes)
+
+
 def measure_region(label: np.ndarray, region: str, spacing: tuple,
                    axcodes: tuple) -> RegionMeasurement:
-    mask = region_mask(label, region)
-    n = int(mask.sum())
+    region_voxels = region_mask(label, region)
+    n = int(region_voxels.sum())
     sx, sy, sz = spacing
     if n == 0:
         return RegionMeasurement(region, 0, 0.0, present=False)
 
-    vol_cm3 = n * (sx * sy * sz) / 1000.0
+    vol_cm3 = n * (sx * sy * sz) / 1000.0            # whole region (tumour burden)
+    lab, sizes = pieces(region_voxels)
+    mask = lab == (np.argmax(sizes) + 1)             # geometry: the main lesion
+    piece_cm3 = sizes * (sx * sy * sz) / 1000.0
 
     # anatomical extents from the bounding box
     coords = np.array(np.nonzero(mask))
@@ -148,7 +180,9 @@ def measure_region(label: np.ndarray, region: str, spacing: tuple,
         region=region, voxels=n, volume_cm3=round(vol_cm3, 2), extent_mm=extent,
         max_diameter_mm=round(max_diam, 1), recist_long_mm=round(best[0], 1),
         recist_short_mm=round(best[1], 1), recist_slice=best[2],
-        location=_location(mask, axcodes), present=True,
+        location=_location(mask, axcodes), present=True, components=len(sizes),
+        large_pieces=int((piece_cm3 >= 1.0).sum()),
+        largest_piece_cm3=round(float(piece_cm3.max()), 2),
     )
 
 
