@@ -1,6 +1,6 @@
 """A compact 2-D U-Net for multi-label brain-tumour segmentation.
 
-Deliberately small (base width 24, ~2 M params) so it trains on CPU. Input is a
+Deliberately small (base width 24, ~4.4 M params) so it trains on CPU. Input is a
 4-channel axial slice (FLAIR, T1w, T1gd, T2w); output is 3 sigmoid maps for the
 nested BraTS regions WT / TC / ET.
 """

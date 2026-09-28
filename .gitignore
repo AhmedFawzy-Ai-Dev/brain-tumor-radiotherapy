@@ -28,3 +28,5 @@ venv/
 # os
 .DS_Store
 Thumbs.db
+!data/brats_split.json
+!data/baseline_cases.txt

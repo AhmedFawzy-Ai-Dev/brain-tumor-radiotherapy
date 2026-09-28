@@ -6,7 +6,7 @@ NOT A MEDICAL DEVICE. Every output is an AI-generated draft and must be verified
 by a qualified clinician before any clinical use.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 # MSD Task01_BrainTumour integer label meanings (verified against dataset.json).
 LABELS = {0: "background", 1: "edema", 2: "non-enhancing tumor", 3: "enhancing tumor"}
@@ -22,6 +22,10 @@ REGION_NAMES = {
     "TC": "Tumour core (non-enhancing + enhancing)",
     "ET": "Enhancing tumour",
 }
+
+# Clean-up of separate predicted tumour pieces (see infer.probs_to_label).
+POST = ("largest", "min1cm3", "all")
+DEFAULT_POST = "largest"
 
 # The 4 MRI channels stacked in each imagesTr volume, in order.
 MODALITIES = ("FLAIR", "T1w", "T1gd", "T2w")

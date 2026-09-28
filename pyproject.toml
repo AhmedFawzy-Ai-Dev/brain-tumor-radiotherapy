@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "brats-report"
-version = "0.1.0"
+version = "0.2.0"
 description = "Research prototype: segment a brain tumour from MRI, measure it in millimetres, and draft a radiotherapy report for clinician review."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -34,7 +34,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=7", "ruff>=0.4"]
-ui = ["gradio>=4"]
+ui = ["gradio>=6"]
+demo = ["playwright>=1.40", "pypdfium2>=4", "pillow>=10"]  # scripts/capture_demo.py
 
 [project.scripts]
 brats-report = "brats_report.cli:main"

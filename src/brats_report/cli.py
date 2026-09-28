@@ -24,7 +24,7 @@ from pathlib import Path
 
 import numpy as np
 
-from . import MODALITIES
+from . import DEFAULT_POST, MODALITIES, POST
 from .io import Scan, load_nifti, load_scan
 from .measure import _slice_axis, measure_all
 from .report import _key_slice, generate_report
@@ -152,6 +152,10 @@ def main(argv=None):
     ap.add_argument("--demo", action="store_true", help="run on a synthetic phantom")
     ap.add_argument("--patient-id", default="")
     ap.add_argument("--thresh", type=float, default=0.5)
+    ap.add_argument("--tta", action="store_true",
+                    help="3-D: average the prediction with its left-right flip")
+    ap.add_argument("--post", default=DEFAULT_POST, choices=POST,
+                    help="3-D: clean-up of separate predicted pieces (default: %(default)s)")
     args = ap.parse_args(argv)
 
     meta = {"Patient ID": args.patient_id or "N/A (de-identified)"}
@@ -182,8 +186,9 @@ def main(argv=None):
     elif args.model:
         from .infer import load_model, predict_label
         model, ckpt = load_model(args.model)
-        label = predict_label(scan, model, ckpt, thresh=args.thresh)
-        info = {"name": f"UNet2D base={ckpt['base']}",
+        label = predict_label(scan, model, ckpt, thresh=args.thresh, tta=args.tta,
+                              post=args.post)
+        info = {"name": f"UNet2D base={ckpt['base']}" + (" + flip TTA" if args.tta else ""),
                 "val_dice_mean": ckpt.get("val_dice_mean", "n/a")}
     else:
         ap.error("provide --model to segment, or --label to use an existing mask")

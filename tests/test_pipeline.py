@@ -1,6 +1,7 @@
 """End-to-end smoke tests for model, dataset, inference and reporting."""
 import numpy as np
 import torch
+from scipy import ndimage
 
 from brats_report import io as bio
 from brats_report.dataset import BratsSlices, label_to_multilabel, list_cases
@@ -55,6 +56,36 @@ def test_infer_returns_label(tmp_path):
     label = predict_label(scan, model, ckpt)
     assert label.shape == scan.data.shape[:3]
     assert label.dtype == np.uint8
+
+
+def test_flip_tta_unflips_its_prediction():
+    # a "model" that passes the first 3 input channels through: a mirrored
+    # prediction mirrored back must equal the plain one, for either axis
+    from brats_report.infer import _predict_slices
+
+    class FirstThree(torch.nn.Module):
+        def forward(self, x):
+            return x[:, :3]
+
+    vol = np.random.default_rng(0).normal(size=(40, 36, 5, 4)).astype(np.float32)
+    plain = _predict_slices(vol, FirstThree(), 32, "cpu", 4)
+    for axis in (0, 1):
+        flipped = _predict_slices(vol, FirstThree(), 32, "cpu", 4, flip_axis=axis)
+        assert np.allclose(plain, flipped, atol=1e-5)
+
+
+def test_post_processing_modes():
+    from brats_report.infer import probs_to_label
+    from brats_report.synthetic import ellipsoid
+
+    shape = (80, 80, 40)
+    probs = np.zeros((3,) + shape, np.float32)
+    probs[0][ellipsoid(shape, (25, 40, 20), (12, 12, 8))] = 0.9    # main lesion
+    probs[0][ellipsoid(shape, (65, 40, 20), (8, 8, 6))] = 0.9      # ~1.6 cm3 second region
+    probs[0][70, 10, 5] = 0.9                                       # a 1-voxel speck
+    count = {post: len(np.unique(ndimage.label(probs_to_label(probs, post=post) > 0)[0])) - 1
+             for post in ("largest", "min1cm3", "all")}
+    assert count == {"largest": 1, "min1cm3": 2, "all": 3}
 
 
 def test_generate_report_writes_files(tmp_path):
