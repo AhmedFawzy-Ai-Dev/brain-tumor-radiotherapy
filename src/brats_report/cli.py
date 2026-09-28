@@ -141,7 +141,9 @@ def _run_2d(path: Path, args, meta):
     return paths
 
 
-def main(argv=None):
+def main(argv=None) -> int:
+    """Entry point of `brats-report`; returns the process exit status (0 = report
+    written). The console script passes it to sys.exit, so it must be an int."""
     ap = argparse.ArgumentParser(description="Brain tumour report (DRAFT).")
     ap.add_argument("--image", help="4-channel NIfTI, a DICOM folder, or a 2-D image")
     ap.add_argument("--label", help="existing integer segmentation NIfTI (skip model)")
@@ -168,8 +170,9 @@ def main(argv=None):
         scan = load_nifti(tmp / "imagesTr" / "DEMO_000.nii.gz")
         label = np.asanyarray(load_nifti(tmp / "labelsTr" / "DEMO_000.nii.gz").data)
         tt = _classify(scan, label, args.classifier) if args.classifier else None
-        return _run(scan, label, args.out, meta,
-                    {"name": "ground-truth (synthetic demo)", "val_dice_mean": "n/a"}, tt)
+        _run(scan, label, args.out, meta,
+             {"name": "ground-truth (synthetic demo)", "val_dice_mean": "n/a"}, tt)
+        return 0
 
     if not args.image:
         ap.error("--image is required (or use --demo)")
@@ -177,7 +180,8 @@ def main(argv=None):
 
     # 2-D image (or single DICOM) -> 2-D segmentation + measurement + type
     if path.suffix.lower() in IMG2D_EXT or path.suffix.lower() == ".dcm":
-        return _run_2d(path, args, meta)
+        _run_2d(path, args, meta)
+        return 0
 
     scan = load_scan(args.image)
     if args.label:
@@ -194,8 +198,9 @@ def main(argv=None):
         ap.error("provide --model to segment, or --label to use an existing mask")
 
     tt = _classify(scan, label, args.classifier) if args.classifier else None
-    return _run(scan, label, args.out, meta, info, tt)
+    _run(scan, label, args.out, meta, info, tt)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

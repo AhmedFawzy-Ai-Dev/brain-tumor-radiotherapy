@@ -33,7 +33,7 @@
   measured diameter drawn on its slice, a web UI, ~20 s per scan on a laptop
   CPU; tumour type on 2-D images at 96.1 % accuracy (1,311 test images).
 - **Reproducible:** a fixed split, per-patient JSON behind every number,
-  `make` targets for each step, 36 tests and CI.
+  `make` targets for each step, 37 tests and CI.
 
 ![Demo: a held-out BraTS patient, from upload to report](docs/images/demo.gif)
 

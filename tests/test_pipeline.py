@@ -103,3 +103,11 @@ def test_make_dataset(tmp_path):
     ids = make_dataset(tmp_path / "syn", n=3, shape=(48, 48, 32))
     assert len(ids) == 3
     assert len(list_cases(tmp_path / "syn")) == 3
+
+
+def test_cli_demo_exits_zero(tmp_path):
+    # the console script does sys.exit(main()): anything but 0 is a failure
+    from brats_report.cli import main
+
+    assert main(["--demo", "--out", str(tmp_path / "demo")]) == 0
+    assert (tmp_path / "demo" / "report.pdf").exists()

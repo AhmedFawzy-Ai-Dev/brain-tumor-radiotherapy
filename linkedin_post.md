@@ -37,7 +37,7 @@ Also in the box:
 ✅ Bilingual PDF report (English + Arabic). I fixed Arabic lines coming out in reverse order: the classic "reorder, then wrap" bug
 ✅ Web UI: upload a scan, get the slice with the measured line, the measurements and the PDF, in ~20 s on a laptop CPU
 ✅ Tumour type on 2-D clinical images: 96.1% accuracy on 1,311 test images
-✅ 36 tests, CI, and every number reproducible with `make`
+✅ 37 tests, CI, and every number reproducible with `make`
 
 The honest part: it's a 2-D model trained on a laptop CPU with 80 patients; 3-D models trained on the full dataset with GPUs do better. It's a research prototype, not a medical device.
 
@@ -76,7 +76,7 @@ The honest part: it's a 2-D model trained on a laptop CPU with 80 patients; 3-D 
 ✅ تقرير PDF بالعربي والإنجليزي: صلّحت إن السطور العربي كانت بتطلع بالمقلوب (أول الجملة في آخر سطر)
 ✅ واجهة ويب: ترفع الـ scan وتاخد الشريحة عليها الخط اللي اتقاس، والقياسات، والـ PDF، في حوالي 20 ثانية على CPU لابتوب
 ✅ تصنيف نوع الورم على صور 2-D: دقة 96.1٪ على 1,311 صورة اختبار
-✅ 36 test و CI، وكل رقم ممكن يتعاد بأمر `make`
+✅ 37 test و CI، وكل رقم ممكن يتعاد بأمر `make`
 
 وبصراحة: ده موديل 2-D متدرّب على CPU لابتوب بـ 80 مريض، والموديلات الـ 3-D المتدرّبة على الداتا كاملة بـ GPU أحسن منه. وده نموذج بحثي، مش جهاز طبي.
 
