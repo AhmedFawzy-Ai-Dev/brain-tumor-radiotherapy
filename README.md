@@ -213,6 +213,15 @@ pip install -e ".[dev,ui]"
 brats-report --demo --out reports/demo        # synthetic phantom -> report; no data, no model
 ```
 
+**Run the app on the trained models** — no data, no training. The models are
+in the [v0.2.0 release](https://github.com/AhmedFawzy-Ai-Dev/brain-tumor-radiotherapy/releases/tag/v0.2.0);
+the script checks each file's SHA-256 before keeping it:
+
+```bash
+python scripts/download_models.py             # ~80 MB into models/  (make models)
+python app.py                                 # http://127.0.0.1:7860
+```
+
 The full pipeline, reproducible end to end (`Makefile` targets; CPU only):
 
 ```bash

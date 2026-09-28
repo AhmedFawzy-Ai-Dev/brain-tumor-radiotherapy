@@ -1,4 +1,4 @@
-.PHONY: install demo data split train-baseline train eval charts islands examples ui capture test lint
+.PHONY: install demo models data split train-baseline train eval charts islands examples ui capture test lint
 
 EVAL = docs/eval
 RUN = python -m brats_report.evaluate run --data data/brats_subset --split data/brats_split.json
@@ -10,6 +10,9 @@ install:
 
 demo:                       ## synthetic phantom -> report, no data or model needed
 	brats-report --demo --out reports/demo
+
+models:                     ## trained models from the GitHub release (SHA-256 checked)
+	python scripts/download_models.py          # add --all for the baseline U-Net (make eval)
 
 data:                       ## 120 BraTS patients: ~1.3 GB of the 7.6 GB archive (range requests)
 	python scripts/download_brats.py --n 120 --prefix-mb 1300 --out data/brats_subset
